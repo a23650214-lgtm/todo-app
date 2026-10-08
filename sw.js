@@ -6,7 +6,7 @@
 //  ※ 새 파일(js 등)을 추가하면 아래 FILES 목록에도 적어 주세요.
 // =====================================================
 
-const CACHE_NAME = 'todo-calendar-v14';
+const CACHE_NAME = 'todo-calendar-v17';
 const FONT_CACHE = 'todo-calendar-fonts';   // 받아 둔 글씨체 (버전이 바뀌어도 지우지 않아요)
 
 const FILES = [
@@ -18,6 +18,8 @@ const FILES = [
   './js/storage.js',
   './js/tasks.js',
   './js/calendar.js',
+  './js/month-picker.js',
+  './js/dday.js',
   './js/drag-sort.js',
   './js/day-view.js',
   './js/stats-view.js',
@@ -32,6 +34,7 @@ const FILES = [
   './js/day-sheet.js',
   './js/screens.js',
   './js/settings-screen.js',
+  './js/profile-view.js',
   './js/continuation.js',
   './js/main.js',
   './icons/icon-192.png',

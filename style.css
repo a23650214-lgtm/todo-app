@@ -92,6 +92,356 @@ body {
   font-size: calc(16px * var(--font-scale));
 }
 
+/* 가운데 제목 "2026년 10월 ▾" (누르면 연도·월 고르는 창) */
+#month-bar .month-title-button {
+  width: auto;
+  height: auto;
+  padding: 6px 12px;
+  border-radius: 12px;
+  font: inherit;               /* 제목 글씨 크기·굵기 그대로 */
+  color: var(--글자);
+}
+#month-bar .month-title-button::after {
+  content: ' ▾';
+  font-size: 0.7em;
+  color: var(--흐린글자);
+}
+#month-bar .month-title-button:active {
+  background: var(--배경);
+}
+
+/* ===== 📌 디데이 카드 (메인 화면 위쪽) ===== */
+#dday-strip {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  overflow-x: auto;              /* 많으면 옆으로 밀어서 보기 */
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;         /* 스크롤 막대 숨기기 */
+  -webkit-overflow-scrolling: touch;
+}
+#dday-strip::-webkit-scrollbar {
+  display: none;
+}
+
+.dday-card {
+  flex: 1 0 128px;               /* 1~2개면 넓게, 많으면 128px씩 */
+  max-width: 100%;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: none;
+  border-radius: 16px;
+  background: var(--카드);
+  color: var(--글자);
+  text-align: left;
+}
+.dday-count {
+  white-space: nowrap;           /* 큰 숫자는 한 줄로 */
+  font-size: calc(28px * var(--font-scale));
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--포인트);
+}
+.dday-name {
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: calc(15px * var(--font-scale));
+  font-weight: bold;
+}
+.dday-date {
+  font-size: calc(12px * var(--font-scale));
+  color: var(--흐린글자);
+}
+/* 당일: 테마 색으로 꽉 채우기 */
+.dday-card.is-today {
+  background: var(--포인트);
+  color: white;
+}
+.dday-card.is-today .dday-count,
+.dday-card.is-today .dday-date {
+  color: white;
+}
+
+/* 끝의 [＋ 관리] */
+.dday-manage {
+  flex: 0 0 60px;
+  scroll-snap-align: end;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  border: 2px dashed var(--흐린글자);
+  border-radius: 16px;
+  background: transparent;
+  color: var(--흐린글자);
+}
+.dday-manage span {
+  font-size: calc(22px * var(--font-scale));
+  line-height: 1;
+}
+.dday-manage small {
+  font-size: calc(12px * var(--font-scale));
+}
+
+/* 디데이가 없을 때 */
+.dday-add-empty {
+  width: 100%;
+  padding: 12px;
+  border: 2px dashed var(--흐린글자);
+  border-radius: 14px;
+  background: transparent;
+  color: var(--흐린글자);
+  font-size: calc(14px * var(--font-scale));
+  font-weight: bold;
+  opacity: 0.8;
+}
+
+/* ===== 📌 디데이 창 ===== */
+#dday-dialog {
+  width: min(380px, calc(100vw - 32px));
+  max-height: calc(100vh - 64px);
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  background: var(--카드);
+  color: var(--글자);
+}
+#dday-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+#dday-dialog h3 {
+  margin: 0 0 12px;
+  font-size: calc(17px * var(--font-scale));
+  outline: none;
+}
+#dday-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.dday-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-bottom: 6px;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: var(--배경);
+  color: var(--글자);
+  text-align: left;
+}
+.dday-row-text {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dday-row-name {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: calc(15px * var(--font-scale));
+  font-weight: bold;
+}
+.dday-row small {
+  font-size: calc(12px * var(--font-scale));
+  color: var(--흐린글자);
+}
+.dday-row strong {
+  flex-shrink: 0;
+  font-size: calc(17px * var(--font-scale));
+  color: var(--포인트);
+}
+.dday-row.past {               /* 지난 디데이: 흐리게 */
+  opacity: 0.55;
+}
+.dday-row.past strong {
+  color: var(--흐린글자);
+}
+#dday-list-empty {
+  margin: 4px 0 12px;
+  text-align: center;
+  color: var(--흐린글자);
+}
+.dday-new {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 12px;
+  background: var(--포인트);
+  color: white;
+  font-size: calc(15px * var(--font-scale));
+  font-weight: bold;
+}
+
+/* 추가·고치기 칸 */
+#dday-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.dday-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: calc(13px * var(--font-scale));
+  color: var(--흐린글자);
+}
+.dday-field input {
+  padding: 12px;
+  font-size: calc(16px * var(--font-scale));   /* 아이폰 확대 방지 */
+  border: none;
+  border-radius: 10px;
+  background: var(--배경);
+  color: var(--글자);
+}
+#dday-preview {
+  margin: 0;
+  text-align: center;
+  font-size: calc(22px * var(--font-scale));
+  font-weight: 800;
+  color: var(--포인트);
+}
+#dday-preview.hint {
+  font-size: calc(13px * var(--font-scale));
+  font-weight: normal;
+  color: var(--흐린글자);
+}
+.dday-form-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.dday-form-actions > span {
+  flex: 1;
+}
+.dday-form-actions button {
+  padding: 10px 14px;
+  border: none;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--흐린글자);
+  font-size: calc(15px * var(--font-scale));
+}
+.dday-form-actions .dday-delete {
+  color: var(--삭제);
+}
+.dday-form-actions .dday-save {
+  background: var(--포인트);
+  color: white;
+  font-weight: bold;
+}
+
+/* ===== 📅 연도와 월 고르는 창 ===== */
+#month-picker {
+  width: min(360px, calc(100vw - 32px));
+  padding: 16px;
+  border: none;
+  border-radius: 16px;
+  background: var(--카드);
+  color: var(--글자);
+}
+#month-picker::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+#month-picker h3 {
+  margin: 0 0 10px;
+  font-size: calc(17px * var(--font-scale));
+  outline: none;
+}
+
+/* ◀◀ ◀ 2026년 ▶ ▶▶ */
+.year-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+.year-bar strong {
+  flex: 1;
+  text-align: center;
+  font-size: calc(20px * var(--font-scale));
+}
+.year-bar button {
+  min-width: 44px;
+  height: 40px;
+  border: none;
+  border-radius: 10px;
+  background: var(--배경);
+  color: var(--글자);
+  font-size: calc(13px * var(--font-scale));
+}
+.year-bar button:disabled {
+  opacity: 0.3;
+}
+
+/* 1월~12월: 4칸 바둑판 */
+#month-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.month-option {
+  position: relative;
+  height: 52px;
+  border: none;
+  border-radius: 12px;
+  background: var(--배경);
+  color: var(--글자);
+  font-size: calc(16px * var(--font-scale));
+}
+.month-option.this-month {          /* 오늘이 있는 달: 테두리 */
+  box-shadow: inset 0 0 0 2px var(--포인트);
+}
+.month-option.viewing {             /* 지금 보고 있는 달: 꽉 채우기 */
+  background: var(--포인트);
+  color: white;
+  font-weight: bold;
+}
+.month-option.has-records::after,   /* 기록이 있는 달: 아래 작은 점 */
+.legend-dot {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--완료);
+}
+.month-option.has-records::after {
+  position: absolute;
+  left: 50%;
+  bottom: 7px;
+  transform: translateX(-50%);
+}
+.month-option.viewing.has-records::after {
+  background: white;
+}
+#month-picker-today {
+  color: var(--포인트);
+  font-weight: bold;
+}
+.picker-legend {
+  margin: 10px 2px 0;
+  font-size: calc(12px * var(--font-scale));
+  color: var(--흐린글자);
+}
+.legend-dot {
+  vertical-align: 2px;
+  margin-right: 2px;
+}
+
 /* 요일 이름 줄과 날짜 칸: 7칸짜리 바둑판 */
 #weekdays,
 #days {
@@ -1026,15 +1376,117 @@ body.drag-active {
   border-radius: 16px;
   background: var(--카드);
 }
-.profile-avatar {
-  display: flex;
+/* 아바타 동그라미 (이모지 또는 사진) - 크기는 쓰는 곳마다 따로 */
+.avatar {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 72px;
-  height: 72px;
+  flex-shrink: 0;
+  overflow: hidden;
   border-radius: 50%;
+  line-height: 1;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;        /* 동그라미에 꽉 차게 */
+  display: block;
+}
+
+/* 프로필 화면의 큰 동그라미 */
+.profile-avatar {
+  width: 88px;
+  height: 88px;
+  padding: 0;
+  border: 3px solid var(--포인트);   /* 테마 색 테두리 */
   background: var(--배경);
-  font-size: calc(38px * var(--font-scale));
+  font-size: calc(44px * var(--font-scale));
+}
+
+/* 메인 화면 맨 위 작은 동그라미 */
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.mini-avatar {
+  width: 32px;
+  height: 32px;
+  border: 2px solid var(--포인트);
+  background: var(--카드);
+  font-size: calc(18px * var(--font-scale));
+}
+
+/* 설정 화면 프로필 줄 아이콘 */
+#profile-row-icon {
+  width: 26px;
+  height: 26px;
+}
+
+/* 😀 이모지로 · 📷 사진 올리기 */
+.avatar-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+.avatar-actions button {
+  padding: 9px 14px;
+  border: none;
+  border-radius: 20px;
+  background: var(--배경);
+  color: var(--포인트);
+  font-size: calc(14px * var(--font-scale));
+  font-weight: bold;
+}
+.avatar-reset {
+  padding: 4px 10px;
+  border: none;
+  background: transparent;
+  color: var(--흐린글자);
+  font-size: calc(13px * var(--font-scale));
+  text-decoration: underline;
+}
+.avatar-error {
+  margin: 0;
+  font-size: calc(13px * var(--font-scale));
+  color: var(--삭제);
+  text-align: center;
+}
+
+/* 🎨 내 테마 색: 5칸 바둑판 */
+.theme-group {
+  padding: 14px 16px;
+}
+#theme-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+}
+.theme-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 0;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--글자);
+  font-size: calc(12px * var(--font-scale));
+}
+.theme-swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+}
+/* 지금 고른 색: 동그라미 바깥에 테두리 한 겹 더 */
+.theme-option.current {
+  background: var(--배경);
+  font-weight: bold;
+}
+.theme-option.current .theme-swatch {
+  box-shadow: 0 0 0 3px var(--카드), 0 0 0 5px currentColor;
 }
 #profile-preview {
   margin: 0;

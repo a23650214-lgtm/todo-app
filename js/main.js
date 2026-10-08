@@ -58,6 +58,14 @@ function render() {
     data: state.data,
   });
 
+  ProfileView.render({
+    data: state.data,
+  });
+
+  DdayView.render({
+    data: state.data,
+  });
+
   SettingsView.render({
     data: state.data,
   });
@@ -163,6 +171,20 @@ form.addEventListener('submit', (event) => {
   update();
 });
 
+// 달력 제목("2026년 10월")을 누르면: 연도와 월을 골라 그 달로 바로 가기
+document.getElementById('month-title').addEventListener('click', () => {
+  MonthPicker.open({
+    data: state.data,
+    year: state.year,
+    month: state.month,
+    onPick: (year, month) => {
+      state.year = year;
+      state.month = month;
+      render();
+    },
+  });
+});
+
 document.getElementById('prev-month').addEventListener('click', () => moveMonth(-1));
 document.getElementById('next-month').addEventListener('click', () => moveMonth(+1));
 
@@ -222,8 +244,22 @@ goalForm.addEventListener('submit', (event) => {
 });
 
 
+// ----- 📌 디데이 (메인 화면 위쪽) -----
+DdayView.setup({
+  getData: () => state.data,
+  onChange: update,
+});
+
+
 // ----- ⚙️ 설정 화면 (프로필, 언어, 화면 오가기) -----
 SettingsScreen.setup({
+  getData: () => state.data,
+  onChange: update,
+});
+
+
+// ----- 👤 프로필 사진 · 🎨 테마 색 (프로필 화면 안) -----
+ProfileView.setup({
   getData: () => state.data,
   onChange: update,
 });
@@ -270,7 +306,9 @@ function askContinuation() {
 }
 // 앱을 켜 둔 채로 달이 바뀐 경우: 앱으로 돌아올 때 확인
 document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') askContinuation();
+  if (document.visibilityState !== 'visible') return;
+  render();             // 날짜가 바뀌었을 수 있으니 다시 그리기 (디데이 숫자, 오늘 표시)
+  askContinuation();
 });
 
 
@@ -278,6 +316,7 @@ document.addEventListener('visibilitychange', () => {
 // 이 기능 전에 만든 매일 반복은 이번 달 말일까지로 맞추기 (한 번만 바뀌어요)
 if (Continuation.capOpenEnded(state.data)) Store.save(state.data);
 Fonts.apply(state.data.settings.font);   // 저장해 둔 글씨체로
+ProfileView.applyTheme(state.data.profile.theme);   // 저장해 둔 테마 색으로
 render();
 Screens.show();   // 주소에 맞는 화면 보여 주기 (보통은 메인 화면)
 askContinuation();

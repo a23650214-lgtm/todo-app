@@ -31,6 +31,8 @@
   <script src="js/storage.js" defer></script>
   <script src="js/tasks.js" defer></script>
   <script src="js/calendar.js" defer></script>
+  <script src="js/month-picker.js" defer></script>
+  <script src="js/dday.js" defer></script>
   <script src="js/drag-sort.js" defer></script>
   <script src="js/day-view.js" defer></script>
   <script src="js/stats-view.js" defer></script>
@@ -45,6 +47,7 @@
   <script src="js/day-sheet.js" defer></script>
   <script src="js/screens.js" defer></script>
   <script src="js/settings-screen.js" defer></script>
+  <script src="js/profile-view.js" defer></script>
   <script src="js/continuation.js" defer></script>
   <script src="js/main.js" defer></script>
 </head>
@@ -62,16 +65,23 @@
 
   <!-- 맨 위: 인사 (별명을 정하면 "👋 봉이님") + ⚙️ 설정 버튼 -->
   <header class="app-header">
-    <span id="greeting"></span>
+    <span class="header-left">
+      <span id="header-avatar" class="avatar mini-avatar" hidden></span>
+      <span id="greeting"></span>
+    </span>
     <button id="open-settings" class="icon-button" type="button" aria-label="설정">⚙️</button>
   </header>
+
+  <!-- 📌 디데이 카드들 (가까운 날짜부터, 지난 건 안 보여요. dday.js가 채워요) -->
+  <section id="dday-strip" aria-label="디데이"></section>
 
   <!-- ===== 달력 ===== -->
   <section id="calendar">
     <!-- 달 넘기기: ◀ 2026년 10월 ▶ -->
     <div id="month-bar">
       <button id="prev-month" type="button" aria-label="이전 달">◀</button>
-      <h1 id="month-title"></h1>
+      <!-- 제목을 누르면 연도와 월을 고르는 창이 떠요 -->
+      <h1><button id="month-title" class="month-title-button" type="button" aria-label="연도와 월 고르기"></button></h1>
       <button id="next-month" type="button" aria-label="다음 달">▶</button>
     </div>
 
@@ -190,7 +200,16 @@
 
   </dialog>
 
-  <!-- ===== 이모지 고르는 창 (평소엔 숨어 있다가 버튼을 누르면 떠요) ===== -->
+  <!-- ===== 이번 달 반복 기록 (반복 할 일이 있을 때만 보여요) ===== -->
+  <section id="stats" hidden>
+    <h2 id="stats-title"></h2>
+    <ul id="stats-list"></ul>
+  </section>
+
+  </main>
+
+  <!-- ===== 이모지 고르는 창 (평소엔 숨어 있다가 버튼을 누르면 떠요) =====
+       메인 화면 밖에 두어야 프로필 화면에서도 쓸 수 있어요 -->
   <dialog id="emoji-dialog">
     <!-- autofocus: 창이 열릴 때 첫 이모지 대신 제목에 초점 (테두리 안 생기게) -->
     <h3 tabindex="-1" autofocus>이모지 고르기</h3>
@@ -215,14 +234,6 @@
     </div>
   </dialog>
 
-  <!-- ===== 이번 달 반복 기록 (반복 할 일이 있을 때만 보여요) ===== -->
-  <section id="stats" hidden>
-    <h2 id="stats-title"></h2>
-    <ul id="stats-list"></ul>
-  </section>
-
-  </main>
-
   <!-- ===== ⚙️ 설정 화면 (메인 화면의 ⚙️ 버튼으로 들어와요) ===== -->
   <section id="settings-view" class="screen" hidden>
     <div class="screen-bar">
@@ -233,7 +244,7 @@
     <div class="settings-group">
       <!-- 👤 프로필: 들어가면 별명을 정해요 -->
       <button id="open-profile" class="settings-row" type="button">
-        <span class="settings-icon">👤</span>
+        <span id="profile-row-icon" class="settings-icon avatar"></span>
         <span class="settings-label">프로필</span>
         <span id="profile-current" class="settings-value"></span>
         <span class="settings-arrow">›</span>
@@ -311,8 +322,19 @@
     </div>
 
     <div class="profile-card">
-      <div class="profile-avatar">🙂</div>
+      <!-- 동그라미를 눌러도 이모지 고르는 창이 떠요 -->
+      <button id="profile-avatar" class="avatar profile-avatar" type="button" aria-label="프로필 사진 바꾸기"></button>
       <p id="profile-preview"></p>
+
+      <!-- 프로필 사진 바꾸기 -->
+      <div class="avatar-actions">
+        <button id="avatar-emoji" type="button">😀 이모지로</button>
+        <button id="avatar-photo" type="button">📷 사진 올리기</button>
+      </div>
+      <button id="avatar-reset" class="avatar-reset" type="button" hidden>기본으로</button>
+      <p id="avatar-error" class="avatar-error" hidden></p>
+      <!-- 사진 고르는 창 (숨어 있다가 "사진 올리기"를 누르면 열려요. 폰에서는 앨범/카메라를 고를 수 있어요) -->
+      <input id="avatar-file" type="file" accept="image/*" hidden>
     </div>
 
     <form id="profile-form" class="settings-group">
@@ -324,6 +346,13 @@
       <p id="profile-saved" hidden></p>
     </form>
     <p class="settings-note">별명은 메인 화면 맨 위 인사에 보여요. 20자까지 쓸 수 있어요.</p>
+
+    <!-- 🎨 내 테마 색: 고르면 앱의 포인트 색(버튼, 강조)이 바뀌어요 -->
+    <div class="settings-group theme-group">
+      <p class="profile-label">🎨 내 테마 색</p>
+      <div id="theme-grid"></div>
+    </div>
+    <p class="settings-note">버튼, 오늘 날짜, 스위치 같은 강조 부분이 이 색으로 바뀌어요.</p>
   </section>
 
   <!-- ===== 🌐 언어 화면 (설정 → 언어) ===== -->
@@ -336,6 +365,58 @@
     <div id="language-list" class="settings-group"></div>
     <p class="settings-note">다른 언어는 곧 추가될 예정이에요.</p>
   </section>
+
+  <!-- ===== 📌 디데이 창: 목록(관리) 또는 추가·고치기 ===== -->
+  <dialog id="dday-dialog">
+    <!-- 목록 -->
+    <div id="dday-list-mode">
+      <h3 tabindex="-1" autofocus>📌 디데이</h3>
+      <ul id="dday-list"></ul>
+      <p id="dday-list-empty">아직 디데이가 없어요</p>
+      <button id="dday-new" class="dday-new" type="button">+ 새 디데이</button>
+      <div class="emoji-actions">
+        <span></span>
+        <button id="dday-close" type="button">닫기</button>
+      </div>
+    </div>
+
+    <!-- 추가·고치기 -->
+    <form id="dday-form" hidden>
+      <h3 id="dday-form-title" tabindex="-1"></h3>
+      <label class="dday-field">이름
+        <input id="dday-title" type="text" maxlength="30" placeholder="예: 토익 시험" autocomplete="off" required>
+      </label>
+      <label class="dday-field">날짜
+        <input id="dday-date" type="date" required>
+      </label>
+      <p id="dday-preview"></p>
+      <div class="dday-form-actions">
+        <button id="dday-delete" class="dday-delete" type="button">삭제</button>
+        <span></span>
+        <button id="dday-cancel" type="button">취소</button>
+        <button type="submit" class="dday-save">저장</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ===== 📅 연도와 월 고르는 창 (달력 제목을 누르면 떠요) ===== -->
+  <dialog id="month-picker">
+    <h3 tabindex="-1" autofocus>연도와 월 고르기</h3>
+    <div class="year-bar">
+      <button id="year-prev10" type="button" aria-label="10년 전">◀◀</button>
+      <button id="year-prev" type="button" aria-label="1년 전">◀</button>
+      <strong id="picker-year"></strong>
+      <button id="year-next" type="button" aria-label="1년 뒤">▶</button>
+      <button id="year-next10" type="button" aria-label="10년 뒤">▶▶</button>
+    </div>
+    <!-- 1월~12월 버튼 (month-picker.js가 채워요) -->
+    <div id="month-grid"></div>
+    <p class="picker-legend"><span class="legend-dot"></span> 기록이 있는 달</p>
+    <div class="emoji-actions">
+      <button id="month-picker-today" type="button">이번 달로</button>
+      <button id="month-picker-cancel" type="button">닫기</button>
+    </div>
+  </dialog>
 
   <!-- 글씨체 고르는 창 (설정 → 글씨체) -->
   <dialog id="font-dialog">

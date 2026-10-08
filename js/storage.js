@@ -16,10 +16,13 @@ const Store = {
       progress: {},     // 기간 목표 진행 기록: { 목표 id: { "2026-10-08": 120, ... } }
       bucket: [],       // 버킷리스트: [ { id, year: 2026, title, done, doneDate }, ... ]
       order: {},        // 직접 바꾼 할 일 순서 (날짜마다): { "2026-10-08": [할 일 id, ...] }
+      ddays: [],        // 디데이: [ { id, title: '토익 시험', date: '2026-11-07' }, ... ]
 
       // 프로필 (앞으로 칸이 더 생길 거예요)
       profile: {
         nickname: '',            // 별명
+        avatar: null,            // 프로필 사진: null(기본 🙂) / { type: 'emoji', value: '🐶' } / { type: 'photo', value: '사진 글자 데이터' }
+        theme: 'blue',           // 내 테마 색 (profile-view.js의 THEMES 참고)
       },
 
       // 설정 (알림, 글씨체, 언어)

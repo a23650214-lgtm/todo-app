@@ -20,15 +20,25 @@ const EmojiPicker = {
   customEl: document.getElementById('emoji-custom'),
   onPick: null,   // 고르면 실행할 일 (open에서 받아요)
 
-  // 처음 한 번: 이모지 버튼들 만들고, 버튼마다 할 일 연결하기
-  setup() {
-    for (const emoji of this.EMOJIS) {
+  shownList: null,   // 지금 창에 깔린 이모지 목록
+
+  // 이모지 버튼들 깔기 (목록이 바뀔 때만 다시 만들어요)
+  fillGrid(emojis) {
+    if (this.shownList === emojis) return;
+    this.shownList = emojis;
+    this.gridEl.innerHTML = '';
+    for (const emoji of emojis) {
       const button = document.createElement('button');
       button.type = 'button';
       button.textContent = emoji;
       button.addEventListener('click', () => this.pick(emoji));
       this.gridEl.appendChild(button);
     }
+  },
+
+  // 처음 한 번: 이모지 버튼들 만들고, 버튼마다 할 일 연결하기
+  setup() {
+    this.fillGrid(this.EMOJIS);
 
     // 직접 입력 → 적용
     document.getElementById('emoji-custom-apply').addEventListener('click', () => {
@@ -52,7 +62,9 @@ const EmojiPicker = {
   },
 
   // 창 열기 (current: 지금 붙어 있는 이모지 → 표시해 줘요)
-  open(current, onPick) {
+  // emojis: 보여 줄 이모지 목록 (빼면 할 일용 기본 목록, 프로필은 프로필용 목록을 넘겨요)
+  open(current, onPick, emojis = this.EMOJIS) {
+    this.fillGrid(emojis);
     this.onPick = onPick;
     this.customEl.value = '';
     for (const button of this.gridEl.children) {

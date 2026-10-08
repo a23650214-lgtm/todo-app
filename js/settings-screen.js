@@ -12,8 +12,7 @@ const SettingsScreen = {
 
   NICKNAME_MAX: 20,
 
-  // 메인 화면 맨 위
-  greetingEl: document.getElementById('greeting'),
+  // (메인 화면 맨 위 인사는 아바타와 같이 보여야 해서 profile-view.js가 그려요)
   // 설정 화면
   profileCurrentEl: document.getElementById('profile-current'),
   languageCurrentEl: document.getElementById('language-current'),
@@ -75,9 +74,6 @@ const SettingsScreen = {
   render({ data }) {
     const nickname = data.profile.nickname;
     const language = this.findLanguage(data.settings.language);
-
-    // 메인 화면 맨 위 인사
-    this.greetingEl.textContent = nickname ? `👋 ${nickname}님` : '📅 할 일 달력';
 
     // 설정 화면 오른쪽 값
     this.profileCurrentEl.textContent = nickname || '설정 안 함';
