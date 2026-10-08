@@ -17,9 +17,15 @@ const Store = {
       bucket: [],       // 버킷리스트: [ { id, year: 2026, title, done, doneDate }, ... ]
       order: {},        // 직접 바꾼 할 일 순서 (날짜마다): { "2026-10-08": [할 일 id, ...] }
 
-      // 설정 (알림, 글씨체)
+      // 프로필 (앞으로 칸이 더 생길 거예요)
+      profile: {
+        nickname: '',            // 별명
+      },
+
+      // 설정 (알림, 글씨체, 언어)
       settings: {
         font: 'default',         // 글씨체 (fonts.js의 FONTS 참고)
+        language: 'ko',          // 언어 (settings-screen.js의 LANGUAGES 참고)
         notify: {
           enabled: false,        // 알림 켜기
           events: true,          // 일정 시간이 되면 알림
@@ -49,6 +55,7 @@ const Store = {
           notify: { ...empty.settings.notify, ...(parsed.settings && parsed.settings.notify) },
         };
         data.notifyLog = { ...empty.notifyLog, ...parsed.notifyLog };
+        data.profile = { ...empty.profile, ...parsed.profile };
         return data;
       }
     } catch (error) {

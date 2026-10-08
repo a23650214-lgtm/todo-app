@@ -20,6 +20,15 @@ const DragSort = {
     });
   },
 
+  // 목록을 감싼 것 중 따로 스크롤되는 상자 찾기 (예: 그날 할 일 팝업). 없으면 null
+  scrollParent(el) {
+    for (let node = el.parentElement; node && node !== document.body; node = node.parentElement) {
+      const overflowY = getComputedStyle(node).overflowY;
+      if (overflowY === 'auto' || overflowY === 'scroll') return node;
+    }
+    return null;
+  },
+
   // 목록의 지금 순서 (위에서부터 id)
   ids(listEl) {
     return [...listEl.children].map(el => el.dataset.id);
@@ -61,18 +70,23 @@ const DragSort = {
       item.style.transform = `translateY(${desiredTop - naturalTop}px)`;
     };
 
-    // 화면 끝 근처에서는 저절로 스크롤 (실제로 끌기 시작한 뒤에만)
+    // 목록이 팝업처럼 따로 스크롤되는 상자 안에 있으면 그 상자를, 아니면 화면 전체를 스크롤해요
+    const scroller = this.scrollParent(listEl);
+
+    // 끝 근처에서는 저절로 스크롤 (실제로 끌기 시작한 뒤에만)
     const tick = () => {
+      const area = scroller ? scroller.getBoundingClientRect() : { top: 0, bottom: window.innerHeight };
       let dy = 0;
       if (!moved) {
         // 아직 잡기만 한 상태: 스크롤하지 않기
-      } else if (pointerY < this.EDGE) {
-        dy = -Math.ceil((this.EDGE - pointerY) / 5);
-      } else if (pointerY > window.innerHeight - this.EDGE) {
-        dy = Math.ceil((pointerY - (window.innerHeight - this.EDGE)) / 5);
+      } else if (pointerY < area.top + this.EDGE) {
+        dy = -Math.ceil((area.top + this.EDGE - pointerY) / 5);
+      } else if (pointerY > area.bottom - this.EDGE) {
+        dy = Math.ceil((pointerY - (area.bottom - this.EDGE)) / 5);
       }
       if (dy !== 0) {
-        window.scrollBy(0, dy);
+        if (scroller) scroller.scrollTop += dy;
+        else window.scrollBy(0, dy);
         place();
       }
       frame = requestAnimationFrame(tick);

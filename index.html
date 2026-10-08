@@ -42,6 +42,9 @@
   <script src="js/settings-view.js" defer></script>
   <script src="js/bucket.js" defer></script>
   <script src="js/bucket-view.js" defer></script>
+  <script src="js/day-sheet.js" defer></script>
+  <script src="js/screens.js" defer></script>
+  <script src="js/settings-screen.js" defer></script>
   <script src="js/continuation.js" defer></script>
   <script src="js/main.js" defer></script>
 </head>
@@ -53,16 +56,15 @@
     <p id="toast-body"></p>
   </div>
 
-  <!-- ===== 메인 화면 (달력, 할 일, 목표, 기록, 알림) =====
-       버킷리스트 화면을 열면 이 부분이 통째로 숨겨져요 -->
+  <!-- ===== 메인 화면: 인사·⚙️ → 달력 → 버킷리스트 → 반복 기록 =====
+       날짜를 누르면 그날 할 일 팝업(day-sheet)이 아래에서 올라와요 -->
   <main id="main-view">
 
-  <!-- 버킷리스트로 들어가는 카드 -->
-  <button id="open-bucket" class="bucket-entry" type="button">
-    <span class="bucket-entry-title">🪣 <span id="bucket-entry-year"></span> 버킷리스트</span>
-    <span id="bucket-entry-count" class="bucket-entry-count"></span>
-    <span class="bucket-entry-arrow">›</span>
-  </button>
+  <!-- 맨 위: 인사 (별명을 정하면 "👋 봉이님") + ⚙️ 설정 버튼 -->
+  <header class="app-header">
+    <span id="greeting"></span>
+    <button id="open-settings" class="icon-button" type="button" aria-label="설정">⚙️</button>
+  </header>
 
   <!-- ===== 달력 ===== -->
   <section id="calendar">
@@ -85,10 +87,37 @@
     <button id="go-today" type="button">오늘로 가기</button>
   </section>
 
+  <!-- ===== 🪣 버킷리스트 (메인 화면에 바로 보여요) ===== -->
+  <section id="bucket">
+    <h2 id="bucket-title"></h2>
+
+    <!-- 10개 중 3개 이뤘어요 + 막대 -->
+    <div class="bucket-progress">
+      <p id="bucket-count"></p>
+      <div class="stats-bar"><div id="bucket-fill" class="stats-fill"></div></div>
+    </div>
+
+    <ul id="bucket-list"></ul>
+    <!-- 목표가 많으면 처음 몇 개만 보이고, 이 버튼으로 펼치고 접어요 -->
+    <button id="bucket-more" type="button" hidden></button>
+    <p id="bucket-empty">아직 버킷리스트가 없어요.<br>올해 꼭 해 보고 싶은 걸 적어 보세요! ✨</p>
+
+    <!-- 목표 추가 -->
+    <form id="bucket-form">
+      <input id="bucket-input" type="text" placeholder="올해 이루고 싶은 것" autocomplete="off">
+      <button type="submit">추가</button>
+    </form>
+  </section>
+
+  <!-- ===== 📅 그날 할 일 팝업 (달력에서 날짜를 누르면 아래에서 올라와요) =====
+       할 일 추가·체크·이모지·색·드래그·삭제, 기간 목표가 모두 여기 들어 있어요 -->
+  <dialog id="day-sheet">
+    <button id="day-sheet-close" class="sheet-close" type="button" aria-label="닫기">✕</button>
+
   <!-- ===== 선택한 날의 할 일 ===== -->
   <section id="day-panel">
-    <!-- 예: 10월 8일 (목) -->
-    <h2 id="selected-title"></h2>
+    <!-- 예: 10월 8일 (목)  (autofocus: 팝업이 열릴 때 키보드가 저절로 튀어나오지 않게 제목에 초점) -->
+    <h2 id="selected-title" tabindex="-1" autofocus></h2>
 
     <!-- 할 일을 입력하는 곳 -->
     <form id="todo-form">
@@ -159,6 +188,8 @@
     </details>
   </section>
 
+  </dialog>
+
   <!-- ===== 이모지 고르는 창 (평소엔 숨어 있다가 버튼을 누르면 떠요) ===== -->
   <dialog id="emoji-dialog">
     <!-- autofocus: 창이 열릴 때 첫 이모지 대신 제목에 초점 (테두리 안 생기게) -->
@@ -190,25 +221,38 @@
     <ul id="stats-list"></ul>
   </section>
 
-  <!-- ===== ✏️ 꾸미기 (글씨체) ===== -->
-  <section id="decor">
-    <h2>✏️ 꾸미기</h2>
-    <button id="open-font" class="decor-row" type="button">
-      <span>글씨체</span>
-      <span id="font-current" class="decor-value"></span>
-      <span class="decor-arrow">›</span>
-    </button>
-  </section>
+  </main>
 
-  <!-- 글씨체 고르는 창 -->
-  <dialog id="font-dialog">
-    <h3 tabindex="-1" autofocus>글씨체 고르기</h3>
-    <div id="font-list"></div>
-    <div class="emoji-actions">
-      <span></span>
-      <button id="font-cancel" type="button">닫기</button>
+  <!-- ===== ⚙️ 설정 화면 (메인 화면의 ⚙️ 버튼으로 들어와요) ===== -->
+  <section id="settings-view" class="screen" hidden>
+    <div class="screen-bar">
+      <button class="icon-button" type="button" data-back aria-label="뒤로">←</button>
+      <h1>설정</h1>
     </div>
-  </dialog>
+
+    <div class="settings-group">
+      <!-- 👤 프로필: 들어가면 별명을 정해요 -->
+      <button id="open-profile" class="settings-row" type="button">
+        <span class="settings-icon">👤</span>
+        <span class="settings-label">프로필</span>
+        <span id="profile-current" class="settings-value"></span>
+        <span class="settings-arrow">›</span>
+      </button>
+      <!-- ✏️ 글씨체: 누르면 고르는 창 -->
+      <button id="open-font" class="settings-row" type="button">
+        <span class="settings-icon">✏️</span>
+        <span class="settings-label">글씨체</span>
+        <span id="font-current" class="settings-value"></span>
+        <span class="settings-arrow">›</span>
+      </button>
+      <!-- 🌐 언어: 지금은 한국어만 (나중에 추가) -->
+      <button id="open-language" class="settings-row" type="button">
+        <span class="settings-icon">🌐</span>
+        <span class="settings-label">언어</span>
+        <span id="language-current" class="settings-value"></span>
+        <span class="settings-arrow">›</span>
+      </button>
+    </div>
 
   <!-- ===== 🔔 알림 설정 ===== -->
   <section id="settings">
@@ -256,8 +300,52 @@
       </ol>
     </details>
   </section>
+  </section>
 
-  </main>
+  <!-- ===== 👤 프로필 화면 (설정 → 프로필) =====
+       앞으로 여기에 기능을 더 넣을 거예요 -->
+  <section id="profile-view" class="screen" hidden>
+    <div class="screen-bar">
+      <button class="icon-button" type="button" data-back aria-label="뒤로">←</button>
+      <h1>프로필</h1>
+    </div>
+
+    <div class="profile-card">
+      <div class="profile-avatar">🙂</div>
+      <p id="profile-preview"></p>
+    </div>
+
+    <form id="profile-form" class="settings-group">
+      <label for="nickname-input" class="profile-label">별명</label>
+      <div class="profile-input-row">
+        <input id="nickname-input" type="text" maxlength="20" placeholder="예: 봉이" autocomplete="off">
+        <button type="submit">저장</button>
+      </div>
+      <p id="profile-saved" hidden></p>
+    </form>
+    <p class="settings-note">별명은 메인 화면 맨 위 인사에 보여요. 20자까지 쓸 수 있어요.</p>
+  </section>
+
+  <!-- ===== 🌐 언어 화면 (설정 → 언어) ===== -->
+  <section id="language-view" class="screen" hidden>
+    <div class="screen-bar">
+      <button class="icon-button" type="button" data-back aria-label="뒤로">←</button>
+      <h1>언어</h1>
+    </div>
+    <!-- settings-screen.js의 LANGUAGES 목록으로 채워요 -->
+    <div id="language-list" class="settings-group"></div>
+    <p class="settings-note">다른 언어는 곧 추가될 예정이에요.</p>
+  </section>
+
+  <!-- 글씨체 고르는 창 (설정 → 글씨체) -->
+  <dialog id="font-dialog">
+    <h3 tabindex="-1" autofocus>글씨체 고르기</h3>
+    <div id="font-list"></div>
+    <div class="emoji-actions">
+      <span></span>
+      <button id="font-cancel" type="button">닫기</button>
+    </div>
+  </dialog>
 
   <!-- ===== "이번 달에도 이어서 할까요?" 창 (새 달에 처음 앱을 열 때 한 번 떠요) ===== -->
   <dialog id="continue-dialog">
@@ -266,27 +354,6 @@
     <ul id="continue-list"></ul>
     <button id="continue-confirm" type="button">확인</button>
   </dialog>
-
-  <!-- ===== 🪣 버킷리스트 화면 (평소엔 숨어 있다가 카드를 누르면 보여요) ===== -->
-  <section id="bucket-view" hidden>
-    <button id="bucket-back" type="button">← 달력</button>
-    <h1 id="bucket-title"></h1>
-
-    <!-- 10개 중 3개 이뤘어요 + 막대 -->
-    <div class="bucket-progress">
-      <p id="bucket-count"></p>
-      <div class="stats-bar"><div id="bucket-fill" class="stats-fill"></div></div>
-    </div>
-
-    <!-- 목표 추가 -->
-    <form id="bucket-form">
-      <input id="bucket-input" type="text" placeholder="올해 이루고 싶은 것" autocomplete="off">
-      <button type="submit">추가</button>
-    </form>
-
-    <ul id="bucket-list"></ul>
-    <p id="bucket-empty">아직 버킷리스트가 없어요.<br>올해 꼭 해 보고 싶은 걸 적어 보세요! ✨</p>
-  </section>
 
 </body>
 </html>

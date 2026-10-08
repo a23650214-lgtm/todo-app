@@ -34,6 +34,11 @@
   -webkit-tap-highlight-color: transparent; /* 폰에서 누를 때 생기는 회색 번쩍임 없애기 */
 }
 
+/* hidden(숨김)이 붙은 건 다른 꾸미기(display 등)보다 먼저 꼭 숨기기 */
+[hidden] {
+  display: none !important;
+}
+
 /* 버튼과 입력칸 글꼴을 앱 글꼴과 똑같이 */
 button {
   font-family: inherit;
@@ -897,40 +902,184 @@ body.drag-active {
   background: var(--완료);
 }
 
-/* ===== ✏️ 꾸미기 ===== */
-#decor {
-  margin-top: 28px;
-  padding: 16px;
+/* ===== 메인 화면 맨 위: 인사 + ⚙️ ===== */
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin: -4px 0 12px 4px;
+}
+#greeting {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;     /* 별명이 길면 … 으로 */
+  font-size: calc(18px * var(--font-scale));
+  font-weight: bold;
+}
+
+/* 동그란 아이콘 버튼 (⚙️, ←) */
+.icon-button {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border: none;
+  border-radius: 50%;
+  background: var(--카드);
+  color: var(--글자);
+  font-size: calc(20px * var(--font-scale));
+  line-height: 1;
+}
+
+/* ===== ⚙️ 설정 · 👤 프로필 · 🌐 언어 화면 ===== */
+.screen-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: -4px 0 18px;
+}
+.screen-bar h1 {
+  margin: 0;
+  font-size: calc(22px * var(--font-scale));
+}
+
+/* 하얀 카드 안에 줄들이 모인 묶음 */
+.settings-group {
+  margin-bottom: 12px;
+  padding: 4px 16px;
   border-radius: 16px;
   background: var(--카드);
 }
-#decor h2 {
-  font-size: calc(17px * var(--font-scale));
-  margin: 0 0 6px;
-}
-.decor-row {
+
+/* 한 줄: 아이콘 · 이름 ......... 값 › */
+.settings-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   width: 100%;
-  padding: 10px 0;
+  min-height: 52px;
+  padding: 12px 0;
   border: none;
   background: transparent;
   color: var(--글자);
-  font-size: calc(15px * var(--font-scale));
+  font-size: calc(16px * var(--font-scale));
   text-align: left;
 }
-.decor-row > span:first-child {
+.settings-row + .settings-row {
+  border-top: 1px solid var(--배경);
+}
+.settings-icon {
+  width: 26px;
+  text-align: center;
+  font-size: calc(18px * var(--font-scale));
+}
+.settings-label {
   flex: 1;
 }
-.decor-value {
-  color: var(--포인트);
-  font-weight: bold;
+.settings-value {
+  max-width: 45%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--흐린글자);
+  font-size: calc(15px * var(--font-scale));
 }
-.decor-arrow {
+.settings-arrow {
   font-size: calc(20px * var(--font-scale));
   line-height: 1;
   color: var(--흐린글자);
+}
+.settings-note {
+  margin: 4px 8px 16px;
+  font-size: calc(13px * var(--font-scale));
+  line-height: 1.5;
+  color: var(--흐린글자);
+}
+
+/* 설정 화면 안의 알림 칸 */
+#settings-view #settings {
+  margin-top: 16px;
+}
+
+/* 언어 목록: 고른 언어에 ✓ */
+.language-check {
+  visibility: hidden;
+  color: var(--포인트);
+  font-weight: bold;
+}
+.language-option.current .language-check {
+  visibility: visible;
+}
+.language-option.current .settings-label {
+  font-weight: bold;
+}
+
+/* 프로필 */
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 24px 16px;
+  border-radius: 16px;
+  background: var(--카드);
+}
+.profile-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--배경);
+  font-size: calc(38px * var(--font-scale));
+}
+#profile-preview {
+  margin: 0;
+  font-size: calc(18px * var(--font-scale));
+  font-weight: bold;
+  word-break: break-all;
+  text-align: center;
+}
+#profile-form {
+  padding: 14px 16px;
+}
+.profile-label {
+  display: block;
+  margin-bottom: 8px;
+  font-size: calc(14px * var(--font-scale));
+  color: var(--흐린글자);
+}
+.profile-input-row {
+  display: flex;
+  gap: 8px;
+}
+#nickname-input {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  font-size: calc(16px * var(--font-scale));   /* 16px 이상: 아이폰 확대 방지 */
+  border: none;
+  border-radius: 10px;
+  background: var(--배경);
+  color: var(--글자);
+}
+#profile-form button {
+  flex-shrink: 0;
+  padding: 0 18px;
+  font-size: calc(16px * var(--font-scale));
+  font-weight: bold;
+  border: none;
+  border-radius: 10px;
+  background: var(--포인트);
+  color: white;
+}
+#profile-saved {
+  margin: 10px 0 0;
+  font-size: calc(14px * var(--font-scale));
+  color: var(--완료);
 }
 
 /* 글씨체 고르는 창 */
@@ -1222,70 +1371,99 @@ body.drag-active {
   color: white;
 }
 
-/* ===== 🪣 버킷리스트로 들어가는 카드 (메인 화면 맨 위) ===== */
-.bucket-entry {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* ===== 📅 그날 할 일 팝업 (화면 아래에서 올라와요) ===== */
+#day-sheet {
   width: 100%;
-  margin-bottom: 14px;
-  padding: 14px 16px;
+  max-width: 500px;
+  max-height: 88vh;
+  max-height: 88dvh;           /* 폰 주소창 높이까지 생각한 화면 높이 (되는 폰에서만) */
+  margin: auto auto 0;         /* 화면 아래쪽에 붙이기 */
+  padding: 20px 16px calc(28px + env(safe-area-inset-bottom));
   border: none;
+  border-radius: 20px 20px 0 0;
+  background: var(--배경);
+  color: var(--글자);
+  overflow-y: auto;            /* 할 일이 많으면 팝업 안에서 스크롤 */
+  overscroll-behavior: contain;   /* 팝업 끝까지 스크롤해도 뒤 화면이 같이 움직이지 않게 */
+}
+#day-sheet[open] {
+  animation: sheet-up 0.22s ease-out;
+}
+@keyframes sheet-up {
+  from { transform: translateY(40px); opacity: 0.6; }
+  to   { transform: none;             opacity: 1; }
+}
+#day-sheet::backdrop {
+  background: rgba(0, 0, 0, 0.4);
+}
+
+/* 팝업 오른쪽 위 ✕ */
+.sheet-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: var(--카드);
+  color: var(--흐린글자);
+  font-size: calc(17px * var(--font-scale));
+}
+
+/* 팝업 안 날짜 제목: ✕와 겹치지 않게 */
+#day-sheet #selected-title {
+  margin: 6px 48px 14px 4px;
+  outline: none;
+}
+
+/* ===== 🪣 버킷리스트 칸 (메인 화면, 달력 아래) ===== */
+#bucket {
+  margin-bottom: 20px;
+  padding: 16px;
   border-radius: 16px;
   background: var(--카드);
-  color: var(--글자);
-  text-align: left;
 }
-.bucket-entry-title {
-  flex: 1;
-  font-size: calc(16px * var(--font-scale));
-  font-weight: bold;
+
+#bucket-title {
+  font-size: calc(17px * var(--font-scale));
+  margin: 0 0 10px;
 }
-.bucket-entry-count {
+
+.bucket-progress {
+  margin-bottom: 12px;
+}
+#bucket-count {
+  margin: 0 0 8px;
   font-size: calc(15px * var(--font-scale));
   font-weight: bold;
   color: var(--완료);
 }
-.bucket-entry-arrow {
-  font-size: calc(22px * var(--font-scale));
-  line-height: 1;
-  color: var(--흐린글자);
+
+/* 목표 줄과 입력칸은 카드 안이라 바탕을 한 톤 다르게 */
+#bucket #bucket-list li,
+#bucket #bucket-input {
+  background: var(--배경);
 }
 
-/* ===== 🪣 버킷리스트 화면 ===== */
-#bucket-back {
-  margin: 0 0 8px -8px;
+/* 더 보기 / 접기 */
+#bucket-more {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
   padding: 8px;
   border: none;
+  border-radius: 10px;
   background: transparent;
   color: var(--포인트);
-  font-size: calc(16px * var(--font-scale));
+  font-size: calc(14px * var(--font-scale));
   font-weight: bold;
-}
-
-#bucket-title {
-  font-size: calc(24px * var(--font-scale));
-  margin: 0 0 16px;
-}
-
-.bucket-progress {
-  padding: 16px;
-  margin-bottom: 16px;
-  border-radius: 16px;
-  background: var(--카드);
-}
-#bucket-count {
-  margin: 0 0 10px;
-  font-size: calc(16px * var(--font-scale));
-  font-weight: bold;
-  color: var(--완료);
 }
 
 /* 목표 추가 칸 */
 #bucket-form {
   display: flex;
   gap: 8px;
-  margin-bottom: 16px;
 }
 #bucket-input {
   flex: 1;
@@ -1319,7 +1497,7 @@ body.drag-active {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 14px;
+  padding: 12px;
   margin-bottom: 8px;
   border-radius: 12px;
   background: var(--카드);
@@ -1360,7 +1538,7 @@ body.drag-active {
 }
 
 #bucket-empty {
-  margin-top: 28px;
+  margin: 8px 0 14px;
   text-align: center;
   line-height: 1.6;
   color: var(--흐린글자);

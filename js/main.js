@@ -24,9 +24,11 @@ function render() {
     year: state.year,
     month: state.month,
     selectedKey: state.selectedKey,
+    // 날짜를 누르면: 그 날을 고르고 → 그날 할 일 팝업 열기
     onSelect: (key) => {
       state.selectedKey = key;
       render();
+      DaySheet.open();
     },
   });
 
@@ -49,6 +51,10 @@ function render() {
   });
 
   FontPicker.render({
+    data: state.data,
+  });
+
+  SettingsScreen.render({
     data: state.data,
   });
 
@@ -216,7 +222,14 @@ goalForm.addEventListener('submit', (event) => {
 });
 
 
-// ----- ✏️ 꾸미기 (글씨체) -----
+// ----- ⚙️ 설정 화면 (프로필, 언어, 화면 오가기) -----
+SettingsScreen.setup({
+  getData: () => state.data,
+  onChange: update,
+});
+
+
+// ----- ✏️ 글씨체 (설정 화면 안) -----
 FontPicker.setup({
   getData: () => state.data,
   onChange: update,
@@ -230,39 +243,7 @@ SettingsView.setup({
 });
 
 
-// ----- 🪣 버킷리스트 화면 오가기 -----
-// 주소 끝에 #bucket이 붙으면 버킷리스트 화면이에요.
-// 이렇게 하면 폰의 "뒤로 가기" 버튼으로도 달력으로 돌아올 수 있어요.
-const mainView = document.getElementById('main-view');
-const bucketView = document.getElementById('bucket-view');
-let openedBucketFromMain = false;   // 메인 화면에서 카드를 눌러 들어왔나요?
-
-function showScreen() {
-  const isBucket = location.hash === '#bucket';
-  mainView.hidden = isBucket;
-  bucketView.hidden = !isBucket;
-  window.scrollTo(0, 0);
-}
-
-document.getElementById('open-bucket').addEventListener('click', () => {
-  openedBucketFromMain = true;
-  location.hash = 'bucket';
-});
-
-document.getElementById('bucket-back').addEventListener('click', () => {
-  if (openedBucketFromMain) {
-    history.back();   // 들어온 길로 돌아가기 (뒤로 가기와 같아요)
-  } else {
-    // 버킷리스트 화면에서 바로 앱을 연 경우: 주소에서 #bucket만 지우기
-    history.replaceState(null, '', location.pathname + location.search);
-    showScreen();
-  }
-  openedBucketFromMain = false;
-});
-
-window.addEventListener('hashchange', showScreen);
-
-// 버킷리스트 목표 추가
+// ----- 🪣 버킷리스트 목표 추가 (메인 화면, 달력 아래) -----
 const bucketForm = document.getElementById('bucket-form');
 const bucketInput = document.getElementById('bucket-input');
 
@@ -298,7 +279,7 @@ document.addEventListener('visibilitychange', () => {
 if (Continuation.capOpenEnded(state.data)) Store.save(state.data);
 Fonts.apply(state.data.settings.font);   // 저장해 둔 글씨체로
 render();
-showScreen();
+Screens.show();   // 주소에 맞는 화면 보여 주기 (보통은 메인 화면)
 askContinuation();
 
 // 알림 담당 시작 (15초마다 보낼 알림이 있는지 확인)
