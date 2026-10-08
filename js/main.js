@@ -32,6 +32,13 @@ function render() {
     onChange: update,
   });
 
+  // ✅ To Do: 🌟 이 달의 목표 (달력과 같은 달)
+  MonthGoalsView.render({
+    data: state.data,
+    year: state.year,
+    month: state.month,
+  });
+
   // ✅ To Do: 할 일 달력
   CalendarView.render({
     data: state.data,
@@ -39,6 +46,14 @@ function render() {
     month: state.month,
     selectedKey: state.selectedKey,
     onSelect: openDay,
+  });
+
+  // 🌱 Habit: 내 습관 (🔥 연속 기록 + 이번 달 달성 현황을 습관마다 한 카드로)
+  HabitListView.render({
+    data: state.data,
+    year: state.year,
+    month: state.month,
+    onChange: update,   // 카드를 누르면 아이콘·색 고치기
   });
 
   // 🌱 Habit: 습관 달력 (To Do와 같은 달)
@@ -62,13 +77,11 @@ function render() {
     onChange: update,
   });
 
-  StatsView.render({
+  FontPicker.render({
     data: state.data,
-    year: state.year,
-    month: state.month,
   });
 
-  FontPicker.render({
+  Appearance.render({
     data: state.data,
   });
 
@@ -219,8 +232,9 @@ document.getElementById('go-today').addEventListener('click', () => {
 });
 
 // 오늘 날짜 팝업을 열고 입력칸 준비하기 (habit: 매일 반복으로 미리 체크)
-function openTodayToAdd(habit) {
-  selectDate(DateUtil.todayKey());
+// 그 날짜 팝업을 열고 입력칸 준비하기 (habit: 매일 반복으로 미리 체크)
+function openDayToAdd(key, habit) {
+  selectDate(key);
   render();
   DaySheet.open();
   repeatInput.checked = habit;
@@ -228,10 +242,13 @@ function openTodayToAdd(habit) {
   syncOptions();
 }
 
-// 🏠 홈 "+ 오늘 할 일 추가"
-document.getElementById('today-add').addEventListener('click', () => openTodayToAdd(false));
-// 🌱 Habit "+ 새 습관 추가" (매일 반복이 미리 체크돼요)
-document.getElementById('habit-add').addEventListener('click', () => openTodayToAdd(true));
+// 🏠 홈 "+ 오늘 할 일 추가" (다른 날을 보고 있으면 그 날로)
+document.getElementById('today-add').addEventListener('click', () => openDayToAdd(HomeView.dateKey(), false));
+// 🌱 Habit "+ 새 습관 추가" (오늘부터, 매일 반복이 미리 체크돼요)
+document.getElementById('habit-add').addEventListener('click', () => openDayToAdd(DateUtil.todayKey(), true));
+
+// 🏠 홈 일정의 ◀ ▶ / 오늘로 돌아가기
+HomeView.setup({ rerender: render });
 
 // 아래 탭 (🏠 홈 / ✅ To Do / 🌱 Habit)
 Tabs.setup();
@@ -287,6 +304,14 @@ goalForm.addEventListener('submit', (event) => {
 });
 
 
+// ----- 🌟 이 달의 목표 (To Do 페이지, 달력 위) -----
+MonthGoalsView.setup({
+  getData: () => state.data,
+  getMonth: () => ({ year: state.year, month: state.month }),
+  onChange: update,
+});
+
+
 // ----- 📌 디데이 (메인 화면 위쪽) -----
 DdayView.setup({
   getData: () => state.data,
@@ -303,6 +328,13 @@ SettingsScreen.setup({
 
 // ----- 👤 프로필 사진 · 🎨 테마 색 (프로필 화면 안) -----
 ProfileView.setup({
+  getData: () => state.data,
+  onChange: update,
+});
+
+
+// ----- 🌓 화면 모드 (설정 화면 안) -----
+Appearance.setup({
   getData: () => state.data,
   onChange: update,
 });
@@ -363,6 +395,7 @@ if (!state.data.profile.randomNickname) {
   state.data.profile.randomNickname = Nicknames.generate();
   Store.save(state.data);
 }
+Appearance.apply(state.data.settings.appearance);   // 저장해 둔 화면 모드로
 Fonts.apply(state.data.settings.font);   // 저장해 둔 글씨체로
 ProfileView.applyTheme(state.data.profile.theme);   // 저장해 둔 테마 색으로
 render();

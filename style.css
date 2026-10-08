@@ -16,16 +16,40 @@
   --app-font: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   /* 글자 크기 배율: 글자를 작게 그리는 손글씨 글씨체는 fonts.js가 키워요 (예: 1.3) */
   --font-scale: 1;
+
+  /* 파스텔 할 일 칸을 얼마나 진하게 칠할지 (다크에서는 덜 진하게) */
+  --pastel-mix: 55%;
+
+  /* 입력칸·날짜 고르기·스크롤 막대를 밝은 모양으로 */
+  color-scheme: light;
 }
 
-/* 폰이 '다크 모드'일 때는 어두운 색으로 */
+/* ===== 🌙 다크 모드 색 =====
+   ⚙️ 설정 → 🌓 화면 모드 (appearance.js)
+     ☀️ 라이트  → <html data-theme="light">  : 늘 밝게
+     🌙 다크    → <html data-theme="dark">   : 늘 어둡게
+     📱 기기 설정 → data-theme 없음          : 폰이 다크 모드면 어둡게 */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --배경: #16171d;
     --카드: #23252e;
     --글자: #eeeeee;
-    --흐린글자: #777777;
+    --흐린글자: #9a9dab;          /* 예전 #777은 어두운 바탕에서 읽기 힘들어서 밝게 */
+    --완료: #34c47c;              /* 초록 글씨도 조금 밝게 */
+    --완료배경: rgba(52, 196, 124, 0.16);
+    --pastel-mix: 35%;
+    color-scheme: dark;
   }
+}
+:root[data-theme="dark"] {
+  --배경: #16171d;
+  --카드: #23252e;
+  --글자: #eeeeee;
+  --흐린글자: #9a9dab;
+  --완료: #34c47c;
+  --완료배경: rgba(52, 196, 124, 0.16);
+  --pastel-mix: 35%;
+  color-scheme: dark;
 }
 
 /* 크기 계산을 쉽게 해 주는 기본 설정 */
@@ -664,7 +688,7 @@ body {
 
 /* 파스텔은 원래 연해서 바탕을 더 진하게 */
 .chip.pastel {
-  background: color-mix(in srgb, var(--chip-color) 55%, transparent);
+  background: color-mix(in srgb, var(--chip-color) var(--pastel-mix), transparent);   /* 라이트 55%, 다크 35% */
 }
 
 /* 끝낸 할 일: 줄 긋고 흐리게 */
@@ -1508,6 +1532,48 @@ body.drag-active {
   font-weight: bold;
   color: var(--완료);
 }
+/* ◀ 10월 9일 금요일 ▶ */
+.day-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: -2px 0 10px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--배경);
+}
+.day-nav-arrow {
+  flex-shrink: 0;
+  width: 40px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  background: var(--카드);
+  color: var(--글자);
+  font-size: calc(14px * var(--font-scale));
+}
+#today-date {
+  flex: 1;
+  text-align: center;
+  font-size: calc(15px * var(--font-scale));
+  font-weight: bold;
+}
+#today-date.not-today {           /* 오늘이 아닌 날: 테마 색으로 눈에 띄게 */
+  color: var(--포인트);
+}
+.today-back {
+  display: block;
+  margin: -4px auto 10px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--포인트) 14%, transparent);
+  color: var(--포인트);
+  font-size: calc(13px * var(--font-scale));
+  font-weight: bold;
+}
+
 #today-list {
   list-style: none;
   margin: 0 0 10px;
@@ -1573,6 +1639,283 @@ body.drag-active {
   margin-bottom: 0;
 }
 
+/* ===== ✅ To Do: 🌟 이 달의 목표 ===== */
+#month-goals {
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  background: var(--카드);
+}
+#month-goals .card-head {
+  align-items: center;
+  margin-bottom: 8px;
+}
+.month-goals-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+#month-goals-count {
+  font-size: calc(13px * var(--font-scale));
+  font-weight: bold;
+  color: var(--완료);
+}
+.month-goals-toggle {
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: var(--배경);
+  color: var(--흐린글자);
+  font-size: calc(13px * var(--font-scale));
+}
+#month-goals .stats-bar {
+  margin-bottom: 10px;
+}
+#month-goals-list {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+}
+#month-goals-list li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+  padding: 8px 6px 8px 12px;
+  border-radius: 10px;
+  background: var(--배경);
+}
+#month-goals-list input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  accent-color: var(--완료);
+}
+.month-goal-title {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 0;
+  font-size: calc(15px * var(--font-scale));
+  word-break: break-all;
+  cursor: text;                /* 누르면 고칠 수 있다는 표시 */
+}
+#month-goals-list li.done .month-goal-title {
+  text-decoration: line-through;
+  color: var(--흐린글자);
+}
+.month-goal-edit {             /* 그 자리에서 고치는 입력칸 */
+  flex: 1;
+  min-width: 0;
+  padding: 6px 8px;
+  font-size: calc(16px * var(--font-scale));   /* 아이폰 확대 방지 */
+  border: 2px solid var(--포인트);
+  border-radius: 8px;
+  background: var(--카드);
+  color: var(--글자);
+}
+.month-goal-delete {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--흐린글자);
+  font-size: calc(14px * var(--font-scale));
+}
+#month-goals-empty {
+  margin: 2px 0 10px;
+  text-align: center;
+  font-size: calc(14px * var(--font-scale));
+  color: var(--흐린글자);
+}
+#month-goals-form {
+  display: flex;
+  gap: 8px;
+}
+#month-goals-input {
+  flex: 1;
+  min-width: 0;
+  padding: 11px 12px;
+  font-size: calc(16px * var(--font-scale));
+  border: none;
+  border-radius: 10px;
+  background: var(--배경);
+  color: var(--글자);
+}
+#month-goals-form button {
+  flex-shrink: 0;
+  padding: 0 16px;
+  border: none;
+  border-radius: 10px;
+  background: var(--포인트);
+  color: white;
+  font-size: calc(15px * var(--font-scale));
+  font-weight: bold;
+}
+
+/* ===== 🌱 Habit: 내 습관 카드 (🔥 연속 기록 + 이번 달 달성 현황을 한 카드로) ===== */
+#page-habit #stats {
+  margin: 0 0 12px;
+}
+#stats-list li {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0 0 6px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--배경);
+  box-shadow: inset 4px 0 0 var(--task-color, var(--포인트));   /* 습관 색 띠 */
+}
+#stats-list li + li {
+  margin-top: 0;
+}
+#stats-list li:last-child {
+  margin-bottom: 0;
+}
+/* 윗줄: 💧 물 2L 먹기 ........ 🔥 10일 */
+.hl-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.streak-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;       /* 이름이 길면 … (글씨가 눌리지 않게) */
+  font-size: calc(15px * var(--font-scale));
+  font-weight: bold;
+}
+.streak-now {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: calc(18px * var(--font-scale));
+  font-weight: 800;
+  color: #f0612d;                /* 불꽃 주황 */
+}
+/* 가운데: 막대 + 19/31일 */
+.hl-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.hl-bar .stats-bar {
+  flex: 1;
+  min-width: 0;
+  background: var(--카드);
+}
+.hl-bar .stats-count {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: calc(13px * var(--font-scale));
+  font-weight: bold;
+}
+/* 아랫줄: 한마디 ........ 🏆 최고 21일 */
+.hl-bottom {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.streak-note {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  font-size: calc(12px * var(--font-scale));
+  color: var(--흐린글자);
+}
+.streak-best {
+  flex-shrink: 0;
+  white-space: nowrap;
+  font-size: calc(12px * var(--font-scale));
+  color: var(--흐린글자);
+}
+/* 0일: 불꽃이 꺼진 것처럼 흐리게 */
+#stats-list li.cold .streak-now {
+  color: var(--흐린글자);
+  filter: grayscale(1);
+  opacity: 0.6;
+}
+/* 지금이 최고 기록: 금색 */
+#stats-list li.record .streak-best {
+  color: #c98a00;
+  font-weight: bold;
+}
+/* 이 달에 끝난 습관 */
+#stats-list li.ended .streak-now {
+  font-size: calc(13px * var(--font-scale));
+  font-weight: normal;
+  color: var(--흐린글자);
+}
+.habit-list-tip {
+  margin: 8px 2px 0;
+  font-size: calc(12px * var(--font-scale));
+  color: var(--흐린글자);
+}
+
+/* ===== 🌱 Habit 배치: 위쪽 📅 달력 → 구분선 → 아래쪽 🔥📊 습관 기록 (폰·넓은 화면 모두) ===== */
+.habit-layout {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 영역 이름 ("📅 습관 달력") */
+.habit-area-label {
+  margin: 2px 6px 8px;
+  font-size: calc(13px * var(--font-scale));
+  font-weight: bold;
+  color: var(--흐린글자);
+}
+
+/* 두 영역 사이 구분선: ───── 🔥 연속 기록 · 📊 달성 현황 ───── */
+.habit-divider {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 4px 14px;
+}
+.habit-divider::before,
+.habit-divider::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  border-radius: 1px;
+  background: color-mix(in srgb, var(--흐린글자) 35%, transparent);
+}
+.habit-divider span {
+  flex-shrink: 0;
+  max-width: 75%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;       /* 아주 좁은 화면에서도 한 줄로 */
+  font-size: calc(13px * var(--font-scale));
+  font-weight: bold;
+  color: var(--흐린글자);
+}
+
+/* 아래쪽 습관 기록 영역: 살짝 다른 바탕으로 한 덩어리처럼 */
+.habit-col-list {
+  padding: 12px;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--포인트) 6%, transparent);
+}
+.habit-col-list #stats {
+  margin-bottom: 12px;
+}
+.habit-col-list .soft-button {
+  margin-bottom: 0;
+}
+/* 위쪽 달력 영역 */
+.habit-col-calendar #habit-calendar {
+  margin-bottom: 0;
+}
 /* ===== 🌱 Habit: 습관 달력 ===== */
 #habit-calendar {
   margin-bottom: 12px;
@@ -1654,6 +1997,48 @@ body.drag-active {
 .habit-dot.future {
   opacity: 0.25;
 }
+/* 아이콘이 있는 습관: 습관 색 동그라미 안에 아이콘 */
+.habit-dot.habit-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  font-size: 9px;              /* 칸이 좁아서 글씨 배율과 상관없이 작게 */
+  line-height: 1;
+  background: transparent;
+  border-style: dashed;        /* 못 지킨 날: 점선 테두리 */
+  filter: grayscale(1);        /* 못 지킨 날: 흑백 */
+  opacity: 0.45;
+}
+.habit-dot.habit-icon.done {   /* 지킨 날: 습관 색으로 또렷하게 */
+  background: color-mix(in srgb, var(--dot-color) 30%, transparent);
+  border-style: solid;
+  filter: none;
+  opacity: 1;
+}
+.habit-dot.habit-icon.future { /* 아직 안 온 날 */
+  opacity: 0.2;
+}
+.habit-marks:has(.habit-icon) {
+  max-width: 38px;             /* 아이콘은 한 줄에 2개씩 */
+}
+
+/* Habit 목록(🔥 연속 기록, 📊 습관 기록): 누르면 아이콘·색 고치기 */
+#stats-list li.editable {
+  cursor: pointer;
+}
+#stats-list li.editable:active {
+  opacity: 0.7;
+}
+/* 📊 습관 기록 막대는 습관 색으로 (색이 없으면 원래 초록) */
+#stats-list .stats-fill {
+  background: var(--habit-color, var(--완료));
+}
+#stats-list .stats-count {
+  color: var(--habit-color, var(--완료));
+}
+
 .habit-more {
   font-size: calc(9px * var(--font-scale));
   line-height: 8px;
@@ -1771,6 +2156,39 @@ body.drag-active {
   font-size: calc(13px * var(--font-scale));
   line-height: 1.5;
   color: var(--흐린글자);
+}
+
+/* 🌓 화면 모드: [☀️ 라이트] [🌙 다크] [📱 기기 설정] */
+.appearance-row {
+  min-height: 44px;
+  padding-bottom: 4px;
+}
+.appearance-options {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 12px 38px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--배경);
+}
+.appearance-option {
+  flex: 1;
+  padding: 9px 4px;
+  border: none;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--흐린글자);
+  font-size: calc(13px * var(--font-scale));
+  font-weight: bold;
+  white-space: nowrap;
+}
+.appearance-option.current {      /* 지금 고른 모드 */
+  background: var(--카드);
+  color: var(--포인트);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12);
+}
+.appearance-options + .settings-row {
+  border-top: 1px solid var(--배경);
 }
 
 /* 설정 화면 안의 알림 칸 */
@@ -2102,7 +2520,7 @@ body.drag-active {
   height: 28px;
   margin: 0;
   border-radius: 14px;
-  background: #c8cad3;
+  background: color-mix(in srgb, var(--흐린글자) 55%, var(--배경));   /* 꺼진 스위치 (다크에서도 보이게) */
   cursor: pointer;
   transition: background 0.2s;
 }
