@@ -159,7 +159,8 @@ const ProfileView = {
   },
 
   render({ data }) {
-    const { nickname, avatar, theme } = data.profile;
+    const { avatar, theme } = data.profile;
+    const nickname = Nicknames.display(data.profile);   // 직접 쓴 별명이 먼저, 없으면 🎲 랜덤 별명
 
     // 프로필 화면
     this.drawAvatar(this.avatarEl, avatar);
@@ -172,7 +173,8 @@ const ProfileView = {
     this.headerAvatarEl.hidden = !avatar;
     if (avatar) this.drawAvatar(this.headerAvatarEl, avatar);
     if (nickname) {
-      this.greetingEl.textContent = avatar ? `${nickname}님` : `👋 ${nickname}님`;
+      const name = Nicknames.withHonorific(nickname);   // "너굴너굴너굴씨"에는 "님"을 안 붙여요
+      this.greetingEl.textContent = avatar ? name : `👋 ${name}`;
     } else {
       this.greetingEl.textContent = avatar ? '할 일 달력' : '📅 할 일 달력';
     }

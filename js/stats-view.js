@@ -12,7 +12,7 @@ const StatsView = {
   render({ data, year, month }) {
     const stats = Tasks.monthStats(data, year, month);
     this.sectionEl.hidden = stats.length === 0;   // 보여 줄 기록이 없으면 숨기기
-    this.titleEl.textContent = `${month + 1}월 반복 기록`;
+    this.titleEl.textContent = `📊 ${month + 1}월 습관 기록`;
     this.listEl.innerHTML = '';
 
     for (const { task, planned, done } of stats) {

@@ -20,7 +20,8 @@ const Store = {
 
       // 프로필 (앞으로 칸이 더 생길 거예요)
       profile: {
-        nickname: '',            // 별명
+        nickname: '',            // 직접 쓴 별명 (있으면 이게 먼저 보여요)
+        randomNickname: '',      // 🎲 자동으로 정해진 랜덤 별명 (nicknames.js)
         avatar: null,            // 프로필 사진: null(기본 🙂) / { type: 'emoji', value: '🐶' } / { type: 'photo', value: '사진 글자 데이터' }
         theme: 'blue',           // 내 테마 색 (profile-view.js의 THEMES 참고)
       },

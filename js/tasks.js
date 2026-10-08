@@ -130,6 +130,44 @@ const Tasks = {
     if (task) task.emoji = emoji || null;
   },
 
+  // 할 일 고치기: changes = { title, emoji, color, date, time }
+  //  - 이름·이모지·색: 모든 할 일
+  //  - 날짜·시간: 하루짜리(once)·시간 일정(event)만
+  //      시간을 넣으면 시간 일정(event), 지우면 일반 할 일(once)이 돼요
+  //      다른 날로 옮기면 체크해 둔 것도 같이 옮겨요
+  updateTask(data, taskId, changes) {
+    const task = data.tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    if (changes.title) task.title = changes.title;
+    task.emoji = changes.emoji || null;
+    task.color = changes.color || null;
+
+    if (task.type !== 'once' && task.type !== 'event') return;   // 매일 반복은 여기까지
+
+    const oldDate = task.date;
+    const newDate = changes.date || oldDate;
+    if (newDate !== oldDate) {
+      const wasDone = this.isDone(data, taskId, oldDate);
+      this.setDone(data, taskId, oldDate, false);
+      if (wasDone) this.setDone(data, taskId, newDate, true);
+      // 옛 날짜의 순서 목록에서 빼기 (새 날짜에서는 맨 아래로)
+      if (data.order && data.order[oldDate]) {
+        data.order[oldDate] = data.order[oldDate].filter(id => id !== taskId);
+        if (data.order[oldDate].length === 0) delete data.order[oldDate];
+      }
+      task.date = newDate;
+    }
+
+    if (changes.time) {
+      task.type = 'event';
+      task.time = changes.time;
+    } else {
+      task.type = 'once';
+      delete task.time;
+    }
+  },
+
   // 색 바꾸기 (null이면 없애기)
   setColor(data, taskId, color) {
     const task = data.tasks.find(t => t.id === taskId);

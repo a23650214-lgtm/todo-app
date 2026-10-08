@@ -31,6 +31,10 @@
   <script src="js/storage.js" defer></script>
   <script src="js/tasks.js" defer></script>
   <script src="js/calendar.js" defer></script>
+  <script src="js/habit-view.js" defer></script>
+  <script src="js/verses.js" defer></script>
+  <script src="js/home-view.js" defer></script>
+  <script src="js/tabs.js" defer></script>
   <script src="js/month-picker.js" defer></script>
   <script src="js/dday.js" defer></script>
   <script src="js/drag-sort.js" defer></script>
@@ -39,6 +43,7 @@
   <script src="js/goal-view.js" defer></script>
   <script src="js/emoji-picker.js" defer></script>
   <script src="js/color-picker.js" defer></script>
+  <script src="js/task-edit.js" defer></script>
   <script src="js/fonts.js" defer></script>
   <script src="js/notifier.js" defer></script>
   <script src="js/settings-view.js" defer></script>
@@ -46,6 +51,7 @@
   <script src="js/bucket-view.js" defer></script>
   <script src="js/day-sheet.js" defer></script>
   <script src="js/screens.js" defer></script>
+  <script src="js/nicknames.js" defer></script>
   <script src="js/settings-screen.js" defer></script>
   <script src="js/profile-view.js" defer></script>
   <script src="js/continuation.js" defer></script>
@@ -59,11 +65,11 @@
     <p id="toast-body"></p>
   </div>
 
-  <!-- ===== 메인 화면: 인사·⚙️ → 달력 → 버킷리스트 → 반복 기록 =====
-       날짜를 누르면 그날 할 일 팝업(day-sheet)이 아래에서 올라와요 -->
+  <!-- ===== 메인 화면: 맨 위 인사·⚙️ + 페이지 3개(홈 / To Do / Habit) + 아래 탭 =====
+       페이지는 아래 탭을 누르거나 좌우로 밀어서 넘겨요 (tabs.js) -->
   <main id="main-view">
 
-  <!-- 맨 위: 인사 (별명을 정하면 "👋 봉이님") + ⚙️ 설정 버튼 -->
+  <!-- 맨 위 (모든 페이지 공통): 인사 + ⚙️ 설정 버튼 -->
   <header class="app-header">
     <span class="header-left">
       <span id="header-avatar" class="avatar mini-avatar" hidden></span>
@@ -71,6 +77,56 @@
     </span>
     <button id="open-settings" class="icon-button" type="button" aria-label="설정">⚙️</button>
   </header>
+
+  <!-- 페이지 3개가 옆으로 나란히 있어요. 좌우로 밀면 한 페이지씩 넘어가요 -->
+  <div id="pages">
+
+  <!-- ==================== 🏠 1페이지: 홈 ==================== -->
+  <section id="page-home" class="page" aria-label="홈">
+
+    <!-- 📖 오늘의 말씀 (날마다 바뀌어요, verses.js) -->
+    <section id="verse-card">
+      <p class="verse-label">📖 오늘의 말씀</p>
+      <blockquote id="verse-text"></blockquote>
+      <p id="verse-ref"></p>
+    </section>
+
+    <!-- 📝 오늘 일정 (오늘 날짜의 할 일, home-view.js) -->
+    <section id="today-card">
+      <div class="card-head">
+        <h2 id="today-title">📝 오늘 일정</h2>
+        <span id="today-count"></span>
+      </div>
+      <ul id="today-list"></ul>
+      <p id="today-empty">오늘은 아직 할 일이 없어요</p>
+      <button id="today-add" class="soft-button" type="button">+ 오늘 할 일 추가</button>
+    </section>
+
+    <!-- ===== 🪣 버킷리스트 (홈 페이지 아래쪽) ===== -->
+    <section id="bucket">
+      <h2 id="bucket-title"></h2>
+
+      <!-- 10개 중 3개 이뤘어요 + 막대 -->
+      <div class="bucket-progress">
+        <p id="bucket-count"></p>
+        <div class="stats-bar"><div id="bucket-fill" class="stats-fill"></div></div>
+      </div>
+
+      <ul id="bucket-list"></ul>
+      <!-- 목표가 많으면 처음 몇 개만 보이고, 이 버튼으로 펼치고 접어요 -->
+      <button id="bucket-more" type="button" hidden></button>
+      <p id="bucket-empty">아직 버킷리스트가 없어요.<br>올해 꼭 해 보고 싶은 걸 적어 보세요! ✨</p>
+
+      <!-- 목표 추가 -->
+      <form id="bucket-form">
+        <input id="bucket-input" type="text" placeholder="올해 이루고 싶은 것" autocomplete="off">
+        <button type="submit">추가</button>
+      </form>
+    </section>
+  </section>
+
+  <!-- ==================== ✅ 2페이지: To Do ==================== -->
+  <section id="page-todo" class="page" aria-label="To Do">
 
   <!-- 📌 디데이 카드들 (가까운 날짜부터, 지난 건 안 보여요. dday.js가 채워요) -->
   <section id="dday-strip" aria-label="디데이"></section>
@@ -97,27 +153,46 @@
     <button id="go-today" type="button">오늘로 가기</button>
   </section>
 
-  <!-- ===== 🪣 버킷리스트 (메인 화면에 바로 보여요) ===== -->
-  <section id="bucket">
-    <h2 id="bucket-title"></h2>
-
-    <!-- 10개 중 3개 이뤘어요 + 막대 -->
-    <div class="bucket-progress">
-      <p id="bucket-count"></p>
-      <div class="stats-bar"><div id="bucket-fill" class="stats-fill"></div></div>
-    </div>
-
-    <ul id="bucket-list"></ul>
-    <!-- 목표가 많으면 처음 몇 개만 보이고, 이 버튼으로 펼치고 접어요 -->
-    <button id="bucket-more" type="button" hidden></button>
-    <p id="bucket-empty">아직 버킷리스트가 없어요.<br>올해 꼭 해 보고 싶은 걸 적어 보세요! ✨</p>
-
-    <!-- 목표 추가 -->
-    <form id="bucket-form">
-      <input id="bucket-input" type="text" placeholder="올해 이루고 싶은 것" autocomplete="off">
-      <button type="submit">추가</button>
-    </form>
+  <p class="page-note">✅ 할 일 달력에는 하루짜리 할 일과 시간 일정이 보여요. 매일 반복은 🌱 Habit에서 볼 수 있어요.</p>
   </section>
+
+  <!-- ==================== 🌱 3페이지: Habit (습관) ==================== -->
+  <section id="page-habit" class="page" aria-label="Habit">
+
+    <!-- 🌱 습관 달력: 날마다 습관마다 ●(지킴) ○(못 지킴) (habit-view.js) -->
+    <section id="habit-calendar">
+      <div class="month-bar">
+        <button id="habit-prev" class="month-arrow" type="button" aria-label="이전 달">◀</button>
+        <h1><button id="habit-title" class="month-title-button" type="button" aria-label="연도와 월 고르기"></button></h1>
+        <button id="habit-next" class="month-arrow" type="button" aria-label="다음 달">▶</button>
+      </div>
+      <div class="weekday-row">
+        <span class="sun">일</span><span>월</span><span>화</span><span>수</span>
+        <span>목</span><span>금</span><span class="sat">토</span>
+      </div>
+      <div id="habit-days"></div>
+      <p id="habit-empty" hidden>아직 습관이 없어요. 아래 버튼으로 첫 습관을 만들어 보세요! 🌱</p>
+      <p class="habit-legend"><span class="habit-dot done"></span> 지킴 &nbsp; <span class="habit-dot"></span> 못 지킴</p>
+    </section>
+
+    <button id="habit-add" class="soft-button" type="button">+ 새 습관 추가 (매일 반복)</button>
+
+    <!-- 📊 이번 달 습관 기록 (예전 "반복 기록"이 여기로 왔어요) -->
+    <section id="stats" hidden>
+      <h2 id="stats-title"></h2>
+      <ul id="stats-list"></ul>
+    </section>
+  </section>
+
+  </div><!-- /pages -->
+
+  <!-- 아래 탭 버튼 -->
+  <nav id="tab-bar" aria-label="페이지">
+    <button class="tab" type="button" data-page="0"><span class="tab-icon">🏠</span><span>홈</span></button>
+    <button class="tab" type="button" data-page="1"><span class="tab-icon">✅</span><span>To Do</span></button>
+    <button class="tab" type="button" data-page="2"><span class="tab-icon">🌱</span><span>Habit</span></button>
+  </nav>
+
 
   <!-- ===== 📅 그날 할 일 팝업 (달력에서 날짜를 누르면 아래에서 올라와요) =====
        할 일 추가·체크·이모지·색·드래그·삭제, 기간 목표가 모두 여기 들어 있어요 -->
@@ -199,12 +274,6 @@
   </section>
 
   </dialog>
-
-  <!-- ===== 이번 달 반복 기록 (반복 할 일이 있을 때만 보여요) ===== -->
-  <section id="stats" hidden>
-    <h2 id="stats-title"></h2>
-    <ul id="stats-list"></ul>
-  </section>
 
   </main>
 
@@ -325,6 +394,8 @@
       <!-- 동그라미를 눌러도 이모지 고르는 창이 떠요 -->
       <button id="profile-avatar" class="avatar profile-avatar" type="button" aria-label="프로필 사진 바꾸기"></button>
       <p id="profile-preview"></p>
+      <!-- 🎲 랜덤 별명 / ✏️ 직접 정한 별명 -->
+      <small id="profile-name-kind" class="profile-name-kind"></small>
 
       <!-- 프로필 사진 바꾸기 -->
       <div class="avatar-actions">
@@ -343,9 +414,11 @@
         <input id="nickname-input" type="text" maxlength="20" placeholder="예: 봉이" autocomplete="off">
         <button type="submit">저장</button>
       </div>
+      <!-- 마음에 안 들면 다시 뽑기 -->
+      <button id="nickname-random" class="nickname-random" type="button">🎲 랜덤으로 다시 뽑기</button>
       <p id="profile-saved" hidden></p>
     </form>
-    <p class="settings-note">별명은 메인 화면 맨 위 인사에 보여요. 20자까지 쓸 수 있어요.</p>
+    <p class="settings-note">별명은 메인 화면 맨 위 인사에 보여요. 20자까지 쓸 수 있어요.<br>직접 쓴 별명이 있으면 그게 먼저 보이고, 지우면 🎲 랜덤 별명이 보여요.</p>
 
     <!-- 🎨 내 테마 색: 고르면 앱의 포인트 색(버튼, 강조)이 바뀌어요 -->
     <div class="settings-group theme-group">
@@ -365,6 +438,50 @@
     <div id="language-list" class="settings-group"></div>
     <p class="settings-note">다른 언어는 곧 추가될 예정이에요.</p>
   </section>
+
+  <!-- ===== ✏️ 할 일 고치기 창 (날짜 팝업에서 할 일 이름을 누르면 떠요) ===== -->
+  <dialog id="task-edit-dialog">
+    <form id="task-edit-form">
+      <h3 tabindex="-1" autofocus>✏️ 할 일 고치기</h3>
+
+      <!-- 이모지 + 이름 -->
+      <div class="edit-title-row">
+        <button id="edit-emoji" type="button" aria-label="이모지 바꾸기">🙂</button>
+        <input id="edit-title" type="text" maxlength="100" autocomplete="off" required>
+      </div>
+
+      <!-- 색 -->
+      <div class="edit-row">
+        <span class="edit-label">🎨 색</span>
+        <button id="edit-color" class="edit-pick" type="button">
+          <span class="color-dot empty"></span> <span id="edit-color-name"></span>
+        </button>
+      </div>
+
+      <!-- 날짜 (하루짜리·시간 일정만) -->
+      <div id="edit-date-row" class="edit-row">
+        <span class="edit-label">📅 날짜</span>
+        <input id="edit-date" type="date">
+      </div>
+
+      <!-- 시간 (하루짜리·시간 일정만. 넣으면 시간 일정, 지우면 일반 할 일) -->
+      <div id="edit-time-row" class="edit-row">
+        <span class="edit-label">⏰ 시간</span>
+        <input id="edit-time" type="time">
+        <button id="edit-time-clear" class="edit-time-clear" type="button" aria-label="시간 지우기" hidden>✕</button>
+      </div>
+
+      <!-- 매일 반복일 때 안내 -->
+      <p id="edit-daily-note" class="edit-note" hidden>🔁 매일 반복 할 일이에요. 바꾸면 이번 달 매일에 같이 바뀌어요.</p>
+
+      <div class="dday-form-actions">
+        <button id="edit-delete" class="dday-delete" type="button">삭제</button>
+        <span></span>
+        <button id="edit-cancel" type="button">취소</button>
+        <button type="submit" class="dday-save">저장</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- ===== 📌 디데이 창: 목록(관리) 또는 추가·고치기 ===== -->
   <dialog id="dday-dialog">

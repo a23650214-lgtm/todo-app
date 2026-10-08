@@ -52,6 +52,12 @@ const DayView = {
       const title = document.createElement('span');
       title.className = 'task-title';
 
+      // 이름 부분을 누르면 고치기 창 (안에 있는 이모지·색 동그라미는 원래대로 각자 동작)
+      title.addEventListener('click', (event) => {
+        if (event.target.closest('button')) return;
+        TaskEdit.open({ data, task, dateKey, onChange });
+      });
+
       // 이름 앞 색 동그라미 (누르면 바꾸기, 없으면 점선 동그라미)
       const colorButton = document.createElement('button');
       colorButton.type = 'button';

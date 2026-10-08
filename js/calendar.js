@@ -1,9 +1,11 @@
 // =====================================================
-//  calendar.js - 달력 그리기
+//  calendar.js - ✅ To Do 페이지의 할 일 달력
 //  날짜 칸마다: 맨 위 날짜 숫자(+ 다 끝낸 날은 ✓), 그 아래 할 일 한 줄씩
 //  예)  8 ✓
-//       💧물먹기     ← 설정한 색 바탕
+//       💼회의       ← 설정한 색 바탕
 //       🥛우유사기
+//  할 일 중심이라 하루짜리 할 일·시간 일정만 보여요.
+//  매일 반복(습관)은 🌱 Habit 페이지의 달력(habit-view.js)에 보여요.
 // =====================================================
 
 const CalendarView = {
@@ -30,7 +32,10 @@ const CalendarView = {
     for (let date = 1; date <= lastDate; date++) {
       const key = DateUtil.toKey(new Date(year, month, date));
       const weekday = (firstWeekday + date - 1) % 7;
-      const status = Tasks.dayStatus(data, key);
+      // 매일 반복(습관)은 빼고, 할 일만
+      const items = Tasks.calendarItems(data, key).filter(item => item.task.type !== 'daily');
+      // 그날 할 일을 다 끝냈나요? ('empty' 할 일 없음 / 'pending' 남음 / 'complete' 다 끝냄)
+      const status = items.length === 0 ? 'empty' : (items.every(item => item.done) ? 'complete' : 'pending');
 
       const cell = document.createElement('button');
       cell.type = 'button';
@@ -55,7 +60,6 @@ const CalendarView = {
       // 그 아래: 할 일 한 줄씩
       const chips = document.createElement('span');
       chips.className = 'day-chips';
-      const items = Tasks.calendarItems(data, key);
       // 줄 수를 넘으면 마지막 한 줄은 "+N개"에 양보
       const shown = items.length > this.MAX_LINES ? items.slice(0, this.MAX_LINES - 1) : items;
       for (const { task, done } of shown) {

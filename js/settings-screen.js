@@ -18,6 +18,7 @@ const SettingsScreen = {
   languageCurrentEl: document.getElementById('language-current'),
   // 프로필 화면
   profilePreviewEl: document.getElementById('profile-preview'),
+  nameKindEl: document.getElementById('profile-name-kind'),
   nicknameInput: document.getElementById('nickname-input'),
   savedEl: document.getElementById('profile-saved'),
   // 언어 화면
@@ -47,11 +48,22 @@ const SettingsScreen = {
       getData().profile.nickname = nickname;
       this.nicknameInput.value = nickname;
       onChange();
-      // "저장했어요"를 잠깐 보여 주기
-      this.savedEl.textContent = nickname ? '✅ 저장했어요' : '✅ 별명을 지웠어요';
-      this.savedEl.hidden = false;
-      clearTimeout(this.savedTimer);
-      this.savedTimer = setTimeout(() => { this.savedEl.hidden = true; }, 2500);
+      this.showSaved(nickname ? '✅ 저장했어요' : '✅ 직접 쓴 별명을 지웠어요. 랜덤 별명이 보여요');
+    });
+
+    // 🎲 랜덤으로 다시 뽑기
+    document.getElementById('nickname-random').addEventListener('click', () => {
+      const profile = getData().profile;
+      if (profile.nickname && !confirm(`직접 정한 별명 '${profile.nickname}' 대신 랜덤 별명을 쓸까요?`)) return;
+      profile.nickname = '';
+      profile.randomNickname = Nicknames.generate(profile.randomNickname);
+      this.nicknameInput.value = '';
+      onChange();
+      this.showSaved(`🎲 '${profile.randomNickname}'(으)로 정했어요`);
+      // 이름이 살짝 통통 튀게
+      this.profilePreviewEl.classList.remove('pop');
+      void this.profilePreviewEl.offsetWidth;   // (움직임을 처음부터 다시 하려고 한 번 읽어 줘요)
+      this.profilePreviewEl.classList.add('pop');
     });
 
     // 언어 목록 버튼 만들기
@@ -71,16 +83,26 @@ const SettingsScreen = {
     }
   },
 
+  // 아래에 "저장했어요" 같은 글을 잠깐 보여 주기
+  showSaved(message) {
+    this.savedEl.textContent = message;
+    this.savedEl.hidden = false;
+    clearTimeout(this.savedTimer);
+    this.savedTimer = setTimeout(() => { this.savedEl.hidden = true; }, 2500);
+  },
+
   render({ data }) {
-    const nickname = data.profile.nickname;
+    const name = Nicknames.display(data.profile);   // 직접 쓴 별명이 먼저, 없으면 랜덤 별명
     const language = this.findLanguage(data.settings.language);
 
     // 설정 화면 오른쪽 값
-    this.profileCurrentEl.textContent = nickname || '설정 안 함';
+    this.profileCurrentEl.textContent = name || '설정 안 함';
     this.languageCurrentEl.textContent = language.name;
 
-    // 프로필 화면 미리보기
-    this.profilePreviewEl.textContent = nickname ? `${nickname}님` : '별명을 정해 주세요';
+    // 프로필 화면 미리보기 + 어떤 별명인지
+    this.profilePreviewEl.textContent = name ? Nicknames.withHonorific(name) : '별명을 정해 주세요';
+    this.nameKindEl.textContent = Nicknames.isCustom(data.profile) ? '✏️ 직접 정한 별명' : '🎲 랜덤 별명';
+    this.nicknameInput.placeholder = data.profile.randomNickname ? `예: ${data.profile.randomNickname}` : '예: 봉이';
 
     // 언어 화면: 고른 언어에 ✓
     for (const button of this.languageListEl.children) {

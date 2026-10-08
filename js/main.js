@@ -17,19 +17,37 @@ function update() {
   render();
 }
 
-// 달력과 목록을 다시 그리기
+// 날짜를 누르면: 그 날을 고르고 → 그날 할 일 팝업 열기 (To Do 달력, Habit 달력 둘 다)
+function openDay(key) {
+  state.selectedKey = key;
+  render();
+  DaySheet.open();
+}
+
+// 화면 전체 다시 그리기
 function render() {
+  // 🏠 홈: 오늘의 말씀 + 오늘 일정
+  HomeView.render({
+    data: state.data,
+    onChange: update,
+  });
+
+  // ✅ To Do: 할 일 달력
   CalendarView.render({
     data: state.data,
     year: state.year,
     month: state.month,
     selectedKey: state.selectedKey,
-    // 날짜를 누르면: 그 날을 고르고 → 그날 할 일 팝업 열기
-    onSelect: (key) => {
-      state.selectedKey = key;
-      render();
-      DaySheet.open();
-    },
+    onSelect: openDay,
+  });
+
+  // 🌱 Habit: 습관 달력 (To Do와 같은 달)
+  HabitView.render({
+    data: state.data,
+    year: state.year,
+    month: state.month,
+    selectedKey: state.selectedKey,
+    onSelect: openDay,
   });
 
   DayView.render({
@@ -172,7 +190,7 @@ form.addEventListener('submit', (event) => {
 });
 
 // 달력 제목("2026년 10월")을 누르면: 연도와 월을 골라 그 달로 바로 가기
-document.getElementById('month-title').addEventListener('click', () => {
+function openMonthPicker() {
   MonthPicker.open({
     data: state.data,
     year: state.year,
@@ -183,15 +201,40 @@ document.getElementById('month-title').addEventListener('click', () => {
       render();
     },
   });
-});
+}
 
+// ✅ To Do 달력의 제목·화살표
+document.getElementById('month-title').addEventListener('click', openMonthPicker);
 document.getElementById('prev-month').addEventListener('click', () => moveMonth(-1));
 document.getElementById('next-month').addEventListener('click', () => moveMonth(+1));
+
+// 🌱 Habit 달력의 제목·화살표 (To Do 달력과 같은 달을 함께 움직여요)
+document.getElementById('habit-title').addEventListener('click', openMonthPicker);
+document.getElementById('habit-prev').addEventListener('click', () => moveMonth(-1));
+document.getElementById('habit-next').addEventListener('click', () => moveMonth(+1));
 
 document.getElementById('go-today').addEventListener('click', () => {
   selectDate(DateUtil.todayKey());
   render();
 });
+
+// 오늘 날짜 팝업을 열고 입력칸 준비하기 (habit: 매일 반복으로 미리 체크)
+function openTodayToAdd(habit) {
+  selectDate(DateUtil.todayKey());
+  render();
+  DaySheet.open();
+  repeatInput.checked = habit;
+  timeInput.value = '';
+  syncOptions();
+}
+
+// 🏠 홈 "+ 오늘 할 일 추가"
+document.getElementById('today-add').addEventListener('click', () => openTodayToAdd(false));
+// 🌱 Habit "+ 새 습관 추가" (매일 반복이 미리 체크돼요)
+document.getElementById('habit-add').addEventListener('click', () => openTodayToAdd(true));
+
+// 아래 탭 (🏠 홈 / ✅ To Do / 🌱 Habit)
+Tabs.setup();
 
 
 // ----- 기간 목표 만들기 -----
@@ -315,6 +358,11 @@ document.addEventListener('visibilitychange', () => {
 // ----- 앱 시작 -----
 // 이 기능 전에 만든 매일 반복은 이번 달 말일까지로 맞추기 (한 번만 바뀌어요)
 if (Continuation.capOpenEnded(state.data)) Store.save(state.data);
+// 🎲 랜덤 별명이 아직 없으면 하나 정해 두기 (처음 한 번만)
+if (!state.data.profile.randomNickname) {
+  state.data.profile.randomNickname = Nicknames.generate();
+  Store.save(state.data);
+}
 Fonts.apply(state.data.settings.font);   // 저장해 둔 글씨체로
 ProfileView.applyTheme(state.data.profile.theme);   // 저장해 둔 테마 색으로
 render();
