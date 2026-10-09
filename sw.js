@@ -6,7 +6,7 @@
 //  ※ 새 파일(js 등)을 추가하면 아래 FILES 목록에도 적어 주세요.
 // =====================================================
 
-const CACHE_NAME = 'todo-calendar-v31';
+const CACHE_NAME = 'todo-calendar-v32';
 const FONT_CACHE = 'todo-calendar-fonts';   // 받아 둔 글씨체 (버전이 바뀌어도 지우지 않아요)
 
 const FILES = [
@@ -54,7 +54,11 @@ const FILES = [
 
 // 설치될 때: 파일 복사본 보관하기
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(FILES)));
+  // cache: 'reload' → 브라우저가 잠깐 들고 있는 옛 파일 말고, 꼭 서버에서 새로 받아요
+  // (안 그러면 새 버전 복사본에 옛 파일이 섞여 들어갈 수 있어요)
+  event.waitUntil(caches.open(CACHE_NAME).then((cache) =>
+    cache.addAll(FILES.map((file) => new Request(file, { cache: 'reload' })))
+  ));
   self.skipWaiting();
 });
 
@@ -100,8 +104,10 @@ self.addEventListener('fetch', (event) => {
 
   if (!request.url.startsWith(self.location.origin)) return;
 
+  // cache: 'no-cache' → 서버에 "바뀐 게 있나요?" 꼭 물어보고 받아요
+  // (GitHub Pages는 브라우저가 파일을 10분 동안 들고 있게 해서, 그냥 받으면 올린 직후에 옛 파일이 섞여요)
   event.respondWith(
-    fetch(request)
+    fetch(request.url, { cache: 'no-cache', credentials: 'same-origin' })
       .then((response) => {
         const copy = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));

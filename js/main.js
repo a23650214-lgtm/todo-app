@@ -449,4 +449,15 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   navigator.serviceWorker.register('sw.js').catch((error) => {
     console.error('오프라인 도우미 등록 실패:', error);
   });
+
+  // 새 버전이 올라오면: 한 번 새로고침해서 모든 파일을 새 버전으로 맞추기
+  // (옛 파일과 새 파일이 섞이면 새 기능이 조용히 안 될 수 있어요)
+  // 처음 설치할 때는 새로고침하지 않아요
+  const hadWorker = !!navigator.serviceWorker.controller;
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!hadWorker || reloaded) return;
+    reloaded = true;
+    location.reload();
+  });
 }
