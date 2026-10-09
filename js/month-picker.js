@@ -111,7 +111,7 @@ const MonthPicker = {
     for (const task of data.tasks) {
       if (task.type === 'once' || task.type === 'event') addKey(task.date);
       if (task.type === 'daily') addRange(task.startDate, task.endDate ? DateUtil.addDays(task.endDate, -1) : task.startDate);
-      if (task.type === 'goal') addRange(task.startDate, task.endDate);
+      if (task.type === 'goal' || task.type === 'range') addRange(task.startDate, task.endDate);
     }
     Object.keys(data.completions).forEach(addKey);
     for (const logs of Object.values(data.progress)) Object.keys(logs).forEach(addKey);

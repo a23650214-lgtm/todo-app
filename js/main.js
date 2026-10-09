@@ -21,6 +21,7 @@ function update() {
 function openDay(key) {
   state.selectedKey = key;
   render();
+  syncOptions();   // 📆 종료일은 고른 날 다음 날부터 고를 수 있게
   DaySheet.open();
 }
 
@@ -134,17 +135,32 @@ const repeatInput = document.getElementById('repeat-input');
 const timeInput = document.getElementById('time-input');
 const timeClear = document.getElementById('time-clear');
 
-// "매일 반복"과 "시간"은 둘 중 하나만: 하나를 고르면 다른 하나는 못 고르게
+const rangeEndInput = document.getElementById('range-end-input');
+const rangeClear = document.getElementById('range-clear');
+
+// "매일 반복", "시간", "📆 기간"은 셋 중 하나만: 하나를 고르면 나머지는 못 고르게
 function syncOptions() {
-  repeatInput.disabled = timeInput.value !== '';
-  timeInput.disabled = repeatInput.checked;
-  timeClear.hidden = timeInput.value === '';   // 시간을 골랐을 때만 ✕ 보이기
+  const hasTime = timeInput.value !== '';
+  const hasRange = rangeEndInput.value !== '';
+  repeatInput.disabled = hasTime || hasRange;
+  timeInput.disabled = repeatInput.checked || hasRange;
+  rangeEndInput.disabled = repeatInput.checked || hasTime;
+  timeClear.hidden = !hasTime;    // 시간을 골랐을 때만 ✕ 보이기
+  rangeClear.hidden = !hasRange;  // 종료일을 골랐을 때만 ✕ 보이기
+  rangeEndInput.min = DateUtil.addDays(state.selectedKey, 1);   // 종료일은 고른 날 다음 날부터
+  rangeEndInput.setCustomValidity('');
 }
 repeatInput.addEventListener('change', syncOptions);
 timeInput.addEventListener('input', syncOptions);
 timeInput.addEventListener('change', syncOptions);
 timeClear.addEventListener('click', () => {
   timeInput.value = '';
+  syncOptions();
+});
+rangeEndInput.addEventListener('input', syncOptions);
+rangeEndInput.addEventListener('change', syncOptions);
+rangeClear.addEventListener('click', () => {
+  rangeEndInput.value = '';
   syncOptions();
 });
 
@@ -184,8 +200,16 @@ form.addEventListener('submit', (event) => {
   const title = input.value.trim();   // 앞뒤 빈칸 없애기
   if (title === '') return;           // 빈 글자는 추가하지 않기
 
+  if (rangeEndInput.value !== '' && rangeEndInput.value <= state.selectedKey) {
+    rangeEndInput.setCustomValidity('종료일은 고른 날보다 뒤여야 해요');
+    rangeEndInput.reportValidity();
+    return;
+  }
+
   if (repeatInput.checked) {
     Tasks.addDaily(state.data, state.selectedKey, title, newEmoji, newColor);                   // 고른 날부터 매일
+  } else if (rangeEndInput.value !== '') {
+    Tasks.addRange(state.data, state.selectedKey, rangeEndInput.value, title, newEmoji, newColor);  // 고른 날 ~ 종료일
   } else if (timeInput.value !== '') {
     Tasks.addEvent(state.data, state.selectedKey, timeInput.value, title, newEmoji, newColor);  // 고른 날, 정한 시간에
   } else {
@@ -194,6 +218,7 @@ form.addEventListener('submit', (event) => {
   input.value = '';
   repeatInput.checked = false;
   timeInput.value = '';
+  rangeEndInput.value = '';
   newEmoji = null;
   showNewEmoji();
   newColor = null;
@@ -239,6 +264,7 @@ function openDayToAdd(key, habit) {
   DaySheet.open();
   repeatInput.checked = habit;
   timeInput.value = '';
+  rangeEndInput.value = '';
   syncOptions();
 }
 
@@ -246,6 +272,9 @@ function openDayToAdd(key, habit) {
 document.getElementById('today-add').addEventListener('click', () => openDayToAdd(HomeView.dateKey(), false));
 // 🌱 Habit "+ 새 습관 추가" (오늘부터, 매일 반복이 미리 체크돼요)
 document.getElementById('habit-add').addEventListener('click', () => openDayToAdd(DateUtil.todayKey(), true));
+
+// ✏️ 고치기 창에서 날짜를 옮기면: 달력도 옮긴 날로 (다른 달이면 그 달로 넘어가요)
+TaskEdit.onMoved = (key) => selectDate(key);
 
 // 🏠 홈 일정의 ◀ ▶ / 오늘로 돌아가기
 HomeView.setup({ rerender: render });

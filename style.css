@@ -2899,3 +2899,94 @@ body.drag-active {
   white-space: pre-line;     /* 요약의 줄바꿈 그대로 보이기 */
   opacity: 0.85;
 }
+
+/* 맨 위 오른쪽: 앱 이름 "PLAN B" + ⚙️ */
+.header-right {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.app-brand {
+  color: var(--포인트);
+  font-size: calc(15px * var(--font-scale));
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+/* ===== 📆 기간 일정: 달력에서 여러 칸에 걸친 띠 ===== */
+/* 이어지는 쪽은 모서리를 펴고, 칸 사이 틈(내 여백 2px + 칸 간격 2px + 옆 칸 여백 2px)을 반씩 덮어요 */
+.chip.range-chip.joins-left {
+  margin-left: -3px;
+  padding-left: 5px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.chip.range-chip.joins-right {
+  margin-right: -3px;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.chip.range-chip.continued {
+  border-left-color: transparent;
+}
+.chip.range-chip.continued.joins-left {
+  border-left-width: 0;
+}
+/* 빈 줄: 기간 띠 한 줄과 같은 높이 */
+.chip-spacer {
+  display: block;
+  height: 16px;
+}
+
+/* 📆 기간 고르기 (할 일 입력칸 아래): "📆 ~ [종료일]" */
+.range-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: calc(15px * var(--font-scale));
+  color: var(--흐린글자);
+}
+.range-toggle input {
+  padding: 6px 8px;
+  font-size: calc(16px * var(--font-scale));           /* 아이폰 확대 방지 */
+  font-family: inherit;
+  border: none;
+  border-radius: 8px;
+  background: var(--카드);
+  color: var(--글자);
+}
+#range-clear {
+  padding: 4px 8px;
+  border: none;
+  background: transparent;
+  color: var(--흐린글자);
+  font-size: calc(15px * var(--font-scale));
+}
+
+/* 목록에 붙는 "10/1 ~ 10/2" 표시 */
+.range-badge {
+  color: var(--글자);
+}
+.today-range {
+  background: color-mix(in srgb, var(--포인트) 18%, transparent);
+  color: var(--포인트);
+}
+
+/* 고치기 창: 시간·종료일 중 못 고르는 쪽은 흐리게 */
+.edit-row.disabled {
+  opacity: 0.4;
+}
+
+/* 기간 띠의 이름: 띠가 이어지는 칸까지 넘어가서 보여요 (--span: 이 주에서 이어지는 칸 수) */
+.chip.range-chip.has-title {
+  overflow: visible;
+}
+.range-title {
+  position: relative;
+  z-index: 1;                /* 옆 칸 띠 위에 글씨가 보이게 */
+  display: block;
+  width: calc(var(--span) * (100% + 6px) - 6px);
+  overflow: hidden;
+}

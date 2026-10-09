@@ -107,6 +107,12 @@ const HomeView = {
         badge.textContent = '🌱 습관';
         title.appendChild(badge);
       }
+      if (task.type === 'range') {
+        const badge = document.createElement('small');
+        badge.className = 'today-badge today-range';
+        badge.textContent = `📆 ${Tasks.rangeLabel(task)}`;
+        title.appendChild(badge);
+      }
       title.append(task.emoji ? `${task.emoji} ${task.title}` : task.title);
       title.addEventListener('click', () => TaskEdit.open({ data, task, dateKey, onChange }));
 

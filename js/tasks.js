@@ -18,12 +18,15 @@
 //    'event' : 시간이 있는 당일 일정
 //              { type: 'event', date: '2026-10-08', time: '14:00', ... }
 //              체크하는 방법은 'once'와 같아요
+//    'range' : 여러 날에 걸친 기간 일정 (예: 대전여행 10월 1일~2일)
+//              { type: 'range', startDate: '2026-10-01', endDate: '2026-10-02', ... }
+//              endDate 날까지 보여요 (그날 포함). 체크는 날마다 따로 해요.
 // =====================================================
 
 const Tasks = {
 
-  // 그날 목록에 보이는 순서: 매일 반복 → 시간 있는 일정 → 시간 없는 할 일
-  TYPE_ORDER: { daily: 0, event: 1, once: 2 },
+  // 그날 목록에 보이는 순서: 매일 반복 → 기간 일정 → 시간 있는 일정 → 시간 없는 할 일
+  TYPE_ORDER: { daily: 0, range: 1, event: 2, once: 3 },
 
   // 이 할 일이 그 날짜에 보여야 하나요?
   // 새 종류를 추가할 때는 여기에 한 줄씩 더하면 돼요.
@@ -36,6 +39,8 @@ const Tasks = {
         return dateKey >= task.startDate && (!task.endDate || dateKey < task.endDate);
       case 'event':
         return task.date === dateKey;
+      case 'range':
+        return task.startDate <= dateKey && dateKey <= task.endDate;
       default:
         return false;
     }
@@ -109,6 +114,29 @@ const Tasks = {
     });
   },
 
+  // 기간 일정 추가하기 (startKey ~ endKey, 두 날 모두 포함)
+  addRange(data, startKey, endKey, title, emoji, color) {
+    data.tasks.push({
+      id: makeId(),
+      type: 'range',
+      startDate: startKey,
+      endDate: endKey,
+      title: title,
+      emoji: emoji || null,
+      color: color || null,
+      createdAt: new Date().toISOString(),
+    });
+  },
+
+  // 기간 일정의 기간 글자: "10/1 ~ 10/2"
+  rangeLabel(task) {
+    const short = (key) => {
+      const date = DateUtil.fromKey(key);
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    };
+    return `${short(task.startDate)} ~ ${short(task.endDate)}`;
+  },
+
   // 매일 반복 할 일 추가하기 (고른 날부터 시작)
   addDaily(data, startKey, title, emoji, color) {
     data.tasks.push({
@@ -130,9 +158,10 @@ const Tasks = {
     if (task) task.emoji = emoji || null;
   },
 
-  // 할 일 고치기: changes = { title, emoji, color, date, time }
+  // 할 일 고치기: changes = { title, emoji, color, date, time, endDate }
   //  - 이름·이모지·색: 모든 할 일
-  //  - 날짜·시간: 하루짜리(once)·시간 일정(event)만
+  //  - 날짜·시간: 하루짜리(once)·시간 일정(event)·기간 일정(range)만
+  //      종료일(endDate)이 날짜보다 뒤면 기간 일정(range)이 돼요 (시간은 없어져요)
   //      시간을 넣으면 시간 일정(event), 지우면 일반 할 일(once)이 돼요
   //      다른 날로 옮기면 체크해 둔 것도 같이 옮겨요
   updateTask(data, taskId, changes) {
@@ -143,7 +172,15 @@ const Tasks = {
     task.emoji = changes.emoji || null;
     task.color = changes.color || null;
 
-    if (task.type !== 'once' && task.type !== 'event') return;   // 매일 반복은 여기까지
+    if (task.type !== 'once' && task.type !== 'event' && task.type !== 'range') return;   // 매일 반복은 여기까지
+
+    // 📆 기간 일정이 되거나, 이미 기간 일정이면 (changes.endDate: 종료일, 없으면 하루짜리)
+    const startDate = changes.date || (task.type === 'range' ? task.startDate : task.date);
+    const endDate = changes.endDate && changes.endDate > startDate ? changes.endDate : null;
+    if (endDate || task.type === 'range') {
+      this.updateRange(data, task, startDate, endDate, changes.time);
+      return;
+    }
 
     const oldDate = task.date;
     const newDate = changes.date || oldDate;
@@ -165,6 +202,47 @@ const Tasks = {
     } else {
       task.type = 'once';
       delete task.time;
+    }
+  },
+
+  // 기간 바꾸기 (updateTask가 불러요)
+  //  - endDate가 있으면 기간 일정 (startDate ~ endDate)
+  //  - endDate가 없으면 기간을 그만두고 startDate 하루짜리로 (time이 있으면 시간 일정)
+  //  체크해 둔 기록·순서는 새 기간 안에 있는 날 것만 남겨요
+  updateRange(data, task, startDate, endDate, time) {
+    // 기간 일정을 통째로 옮기면 (예: 1~2일 → 3~4일) 체크해 둔 것도 같은 만큼 같이 옮겨요
+    if (task.type === 'range' && endDate && startDate !== task.startDate) {
+      const shift = DateUtil.daysBetween(task.startDate, startDate);
+      const doneKeys = Object.keys(data.completions).filter(key =>
+        this.isScheduledOn(task, key) && this.isDone(data, task.id, key));
+      for (const key of doneKeys) this.setDone(data, task.id, key, false);
+      for (const key of doneKeys) {
+        const moved = DateUtil.addDays(key, shift);
+        if (startDate <= moved && moved <= endDate) this.setDone(data, task.id, moved, true);
+      }
+    }
+
+    delete task.date;
+    delete task.time;
+    delete task.startDate;
+    delete task.endDate;
+    if (endDate) {
+      task.type = 'range';
+      task.startDate = startDate;
+      task.endDate = endDate;
+    } else {
+      task.type = time ? 'event' : 'once';
+      task.date = startDate;
+      if (time) task.time = time;
+    }
+
+    for (const key of Object.keys(data.completions)) {
+      if (!this.isScheduledOn(task, key)) this.setDone(data, task.id, key, false);
+    }
+    for (const key of Object.keys(data.order || {})) {
+      if (this.isScheduledOn(task, key)) continue;
+      data.order[key] = data.order[key].filter(id => id !== task.id);
+      if (data.order[key].length === 0) delete data.order[key];
     }
   },
 
@@ -288,7 +366,7 @@ const Tasks = {
   //   - 안 바꿨으면 → 시간 일정(시간 순) → 하루짜리 → 매일 반복
   // 결과 예: [ { task: {...}, done: false }, ... ]
   calendarItems(data, dateKey) {
-    const ORDER = { event: 0, once: 1, daily: 2 };
+    const ORDER = { range: -1, event: 0, once: 1, daily: 2 };
     let tasks = this.forDate(data, dateKey);
     if (!this.customOrder(data, dateKey)) {
       tasks = tasks.sort((a, b) => ORDER[a.type] - ORDER[b.type]);

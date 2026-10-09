@@ -88,6 +88,12 @@ const DayView = {
         badge.textContent = DateUtil.timeLabel(task.time);
         title.appendChild(badge);
       }
+      if (task.type === 'range') {
+        const badge = document.createElement('small');
+        badge.className = 'badge range-badge';
+        badge.textContent = `📆 ${Tasks.rangeLabel(task)}`;
+        title.appendChild(badge);
+      }
       title.append(task.title);
 
       // 이름 뒤 이모지 (누르면 바꾸기, 없으면 흐린 🙂)
@@ -115,6 +121,10 @@ const DayView = {
           const ok = confirm(`'${task.title}'을(를) ${DateUtil.label(dateKey)}부터 그만할까요?\n지난 기록은 그대로 남아요.`);
           if (!ok) return;
           Tasks.stopFrom(data, task.id, dateKey);
+        } else if (task.type === 'range') {
+          // 기간 일정은 다른 날 칸에서도 같이 사라지니까 한 번 물어봐요
+          if (!confirm(`'${task.title}' (${Tasks.rangeLabel(task)} 전체)을(를) 지울까요?`)) return;
+          Tasks.remove(data, task.id);
         } else {
           Tasks.remove(data, task.id);
         }

@@ -6,7 +6,7 @@
 //  ※ 새 파일(js 등)을 추가하면 아래 FILES 목록에도 적어 주세요.
 // =====================================================
 
-const CACHE_NAME = 'todo-calendar-v27';
+const CACHE_NAME = 'todo-calendar-v30';
 const FONT_CACHE = 'todo-calendar-fonts';   // 받아 둔 글씨체 (버전이 바뀌어도 지우지 않아요)
 
 const FILES = [

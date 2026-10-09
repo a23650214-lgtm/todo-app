@@ -6,7 +6,7 @@
   <!-- 폰 화면 크기에 딱 맞게 보여 주는 설정 -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <!-- 브라우저 탭에 보이는 이름 -->
-  <title>할 일 달력</title>
+  <title>PLAN B</title>
 
   <!-- ===== 앱처럼 쓰기 위한 설정 (PWA) ===== -->
   <link rel="manifest" href="manifest.json">
@@ -15,7 +15,7 @@
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-title" content="할 일 달력">
+  <meta name="apple-mobile-web-app-title" content="PLAN B">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
 
   <!-- 글씨체를 받아올 구글 폰트에 미리 연결해 두기 (글씨체가 조금 더 빨리 떠요) -->
@@ -87,7 +87,10 @@
       <span id="header-avatar" class="avatar mini-avatar" hidden></span>
       <span id="greeting"></span>
     </span>
-    <button id="open-settings" class="icon-button" type="button" aria-label="설정">⚙️</button>
+    <span class="header-right">
+      <span class="app-brand">PLAN B</span>
+      <button id="open-settings" class="icon-button" type="button" aria-label="설정">⚙️</button>
+    </span>
   </header>
 
   <!-- 페이지 3개가 옆으로 나란히 있어요. 좌우로 밀면 한 페이지씩 넘어가요 -->
@@ -277,6 +280,13 @@
           </label>
           <button id="time-clear" type="button" aria-label="시간 지우기" hidden>✕</button>
         </span>
+        <!-- 종료일을 고르고 추가하면 이 날부터 그날까지 이어지는 기간 일정이 돼요 (예: 대전여행 10/1 ~ 10/2) -->
+        <span class="time-group">
+          <label class="range-toggle">
+            📆 기간 ~ <input id="range-end-input" type="date" aria-label="종료일">
+          </label>
+          <button id="range-clear" type="button" aria-label="종료일 지우기" hidden>✕</button>
+        </span>
         <!-- 누르면 색 고르는 창이 떠요 -->
         <button id="new-color" class="color-toggle" type="button" aria-label="색 고르기">
           <span class="color-dot empty"></span> 색
@@ -428,7 +438,7 @@
         <li><strong>Safari</strong>로 이 앱 주소를 열어요</li>
         <li>아래쪽 <strong>공유 버튼</strong>(네모에 화살표 ⬆️)을 눌러요</li>
         <li><strong>홈 화면에 추가</strong>를 누르고 오른쪽 위 <strong>추가</strong>를 눌러요</li>
-        <li>홈 화면에 생긴 <strong>할 일 달력</strong> 아이콘으로 앱을 열어요</li>
+        <li>홈 화면에 생긴 <strong>PLAN B</strong> 아이콘으로 앱을 열어요</li>
         <li>여기 <strong>알림 켜기</strong>를 누르고 <strong>허용</strong>을 눌러요</li>
       </ol>
       <p><strong>안드로이드 (Chrome)</strong></p>
@@ -517,10 +527,17 @@
         </button>
       </div>
 
-      <!-- 날짜 (하루짜리·시간 일정만) -->
+      <!-- 날짜 (하루짜리·시간 일정·기간 일정만. 기간 일정이면 "시작일"로 보여요) -->
       <div id="edit-date-row" class="edit-row">
-        <span class="edit-label">📅 날짜</span>
+        <span id="edit-date-label" class="edit-label">📅 날짜</span>
         <input id="edit-date" type="date">
+      </div>
+
+      <!-- 종료일 (넣으면 여러 날에 걸친 기간 일정, 지우면 하루짜리) -->
+      <div id="edit-end-row" class="edit-row">
+        <span class="edit-label">📆 종료</span>
+        <input id="edit-end" type="date">
+        <button id="edit-end-clear" class="edit-time-clear" type="button" aria-label="종료일 지우기" hidden>✕</button>
       </div>
 
       <!-- 시간 (하루짜리·시간 일정만. 넣으면 시간 일정, 지우면 일반 할 일) -->

@@ -176,8 +176,11 @@ const ProfileView = {
       const name = Nicknames.withHonorific(nickname);   // "너굴너굴너굴씨"에는 "님"을 안 붙여요
       this.greetingEl.textContent = avatar ? name : `👋 ${name}`;
     } else {
-      this.greetingEl.textContent = avatar ? '할 일 달력' : '📅 할 일 달력';
+      this.greetingEl.textContent = avatar ? 'PLAN B' : '📅 PLAN B';
     }
+    // 별명이 없으면 왼쪽에 이미 "PLAN B"가 보이니까 오른쪽 이름표는 숨겨요 (두 번 안 보이게)
+    const brandEl = document.querySelector('.app-brand');
+    if (brandEl) brandEl.hidden = !nickname;
 
     // 설정 화면 프로필 줄 아이콘
     this.drawAvatar(this.rowIconEl, avatar, '👤');
