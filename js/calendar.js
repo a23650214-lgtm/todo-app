@@ -43,6 +43,7 @@ const CalendarView = {
       const cell = document.createElement('button');
       cell.type = 'button';
       cell.className = 'day';
+      cell.dataset.key = key;   // 끌어서 옮길 때 어느 날 칸인지 알아보려고 (calendar-drag.js)
       if (weekday === 0) cell.classList.add('sun');
       if (weekday === 6) cell.classList.add('sat');
       if (key === todayKey) cell.classList.add('today');
@@ -165,6 +166,7 @@ const CalendarView = {
   makeChip(task, done) {
     const chip = document.createElement('span');
     chip.className = 'chip';
+    chip.dataset.id = task.id;   // 끌어서 옮길 때 어떤 할 일인지 (calendar-drag.js)
     if (done) chip.classList.add('done');
 
     const hex = ColorPicker.hex(task.color);

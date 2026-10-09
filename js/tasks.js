@@ -205,6 +205,23 @@ const Tasks = {
     }
   },
 
+  // 달력에서 끌어서 옮기기: days일만큼 앞(-)이나 뒤(+)로 (기간 일정은 길이 그대로, 체크도 같이)
+  moveBy(data, taskId, days) {
+    const task = data.tasks.find(t => t.id === taskId);
+    if (!task || days === 0) return;
+    if (task.type === 'range') {
+      this.updateRange(data, task, DateUtil.addDays(task.startDate, days), DateUtil.addDays(task.endDate, days), null);
+    } else if (task.type === 'once' || task.type === 'event') {
+      this.updateTask(data, taskId, {
+        title: task.title,
+        emoji: task.emoji,
+        color: task.color,
+        date: DateUtil.addDays(task.date, days),
+        time: task.time || '',
+      });
+    }
+  },
+
   // 기간 바꾸기 (updateTask가 불러요)
   //  - endDate가 있으면 기간 일정 (startDate ~ endDate)
   //  - endDate가 없으면 기간을 그만두고 startDate 하루짜리로 (time이 있으면 시간 일정)

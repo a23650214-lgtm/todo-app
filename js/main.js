@@ -273,6 +273,12 @@ document.getElementById('today-add').addEventListener('click', () => openDayToAd
 // 🌱 Habit "+ 새 습관 추가" (오늘부터, 매일 반복이 미리 체크돼요)
 document.getElementById('habit-add').addEventListener('click', () => openDayToAdd(DateUtil.todayKey(), true));
 
+// ✅ To Do 달력: 일정을 꾹 눌러 끌어서 다른 날로 옮기기
+CalendarDrag.setup({
+  getData: () => state.data,
+  onChange: update,
+});
+
 // ✏️ 고치기 창에서 날짜를 옮기면: 달력도 옮긴 날로 (다른 달이면 그 달로 넘어가요)
 TaskEdit.onMoved = (key) => selectDate(key);
 
