@@ -3027,3 +3027,23 @@ body.drag-active {
 .app-version {
   text-align: center;
 }
+
+/* ===== 💬 설정 → 오늘의 문구: 고른 종류의 오늘 문구 미리보기 (홈 카드와 같은 모양) ===== */
+.quote-preview {
+  margin: 12px 0;
+  padding: 18px 18px 14px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--포인트) 12%, var(--카드));
+}
+#quote-preview-text {
+  margin: 10px 0 8px;
+  font-size: calc(16px * var(--font-scale));
+  line-height: 1.75;
+  word-break: keep-all;
+}
+#quote-preview-ref {
+  margin: 0;
+  text-align: right;
+  font-size: calc(13px * var(--font-scale));
+  color: var(--흐린글자);
+}

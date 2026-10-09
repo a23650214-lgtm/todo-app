@@ -5,6 +5,7 @@
 // =====================================================
 
 const HomeView = {
+  verseLabelEl: document.getElementById('verse-label'),
   verseTextEl: document.getElementById('verse-text'),
   verseRefEl: document.getElementById('verse-ref'),
   todayTitleEl: document.getElementById('today-title'),
@@ -55,10 +56,13 @@ const HomeView = {
     const dateKey = this.dateKey();
     const isToday = dateKey === todayKey;
 
-    // 📖 오늘의 말씀 (늘 오늘 것)
-    const verse = Verses.forDate(todayKey);
+    // 📖 오늘의 문구 (늘 오늘 것): 설정에서 고른 종류 (성경 말씀 / 힐링 명언 / 명사 명언, quotes.js)
+    const quoteType = Quotes.findType(data.settings.quoteType);
+    const verse = Quotes.forDate(quoteType.key, todayKey);
+    this.verseLabelEl.textContent = quoteType.title;
     this.verseTextEl.textContent = verse.text;
-    this.verseRefEl.textContent = `— ${verse.ref}`;
+    this.verseRefEl.textContent = verse.ref ? `— ${verse.ref}` : '';
+    this.verseRefEl.hidden = !verse.ref;   // 출처가 없는 문구(힐링)는 출처 줄 숨기기
 
     // 📝 제목·날짜·버튼
     this.todayTitleEl.textContent = isToday ? '📝 오늘 일정' : '📝 일정';

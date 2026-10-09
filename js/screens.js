@@ -17,6 +17,7 @@ const Screens = {
     settings: { hash: '#settings',          el: 'settings-view', parent: 'main' },
     profile:  { hash: '#settings/profile',  el: 'profile-view',  parent: 'settings' },
     language: { hash: '#settings/language', el: 'language-view', parent: 'settings' },
+    quote:    { hash: '#settings/quote',    el: 'quote-view',    parent: 'settings' },
   },
 
   onShow: {},   // 화면이 보일 때 할 일 (예: 프로필 화면이 열리면 입력칸 채우기)

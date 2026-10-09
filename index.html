@@ -47,6 +47,7 @@
   <script src="js/streaks.js" defer></script>
   <script src="js/habit-list.js" defer></script>
   <script src="js/verses.js" defer></script>
+  <script src="js/quotes.js" defer></script>
   <script src="js/home-view.js" defer></script>
   <script src="js/tabs.js" defer></script>
   <script src="js/month-picker.js" defer></script>
@@ -102,9 +103,10 @@
   <!-- ==================== 🏠 1페이지: 홈 ==================== -->
   <section id="page-home" class="page" aria-label="홈">
 
-    <!-- 📖 오늘의 말씀 (날마다 바뀌어요, verses.js) -->
+    <!-- 📖 오늘의 문구 (날마다 바뀌어요). 종류는 설정에서 골라요: 성경 말씀 / 힐링 명언 / 명사 명언 (quotes.js)
+         제목도 종류에 맞게 바뀌어요 (home-view.js) -->
     <section id="verse-card">
-      <p class="verse-label">📖 오늘의 말씀</p>
+      <p id="verse-label" class="verse-label">📖 오늘의 말씀</p>
       <blockquote id="verse-text"></blockquote>
       <p id="verse-ref"></p>
     </section>
@@ -404,6 +406,13 @@
         <span id="language-current" class="settings-value"></span>
         <span class="settings-arrow">›</span>
       </button>
+      <!-- 💬 홈 오늘의 문구 종류: 들어가면 셋 중 하나를 골라요 -->
+      <button id="open-quote" class="settings-row" type="button">
+        <span class="settings-icon">💬</span>
+        <span class="settings-label">오늘의 문구</span>
+        <span id="quote-current" class="settings-value"></span>
+        <span class="settings-arrow">›</span>
+      </button>
     </div>
 
   <!-- ===== 🔔 알림 설정 ===== -->
@@ -454,7 +463,7 @@
   </section>
 
     <!-- 지금 쓰는 앱 버전 (새 버전을 올리면 sw.js의 CACHE_NAME 숫자와 같이 바꿔 주세요) -->
-    <p class="settings-note app-version">PLAN B · 버전 v33</p>
+    <p class="settings-note app-version">PLAN B · 버전 v34</p>
   </section>
 
   <!-- ===== 👤 프로필 화면 (설정 → 프로필) =====
@@ -512,6 +521,23 @@
     <!-- settings-screen.js의 LANGUAGES 목록으로 채워요 -->
     <div id="language-list" class="settings-group"></div>
     <p class="settings-note">다른 언어는 곧 추가될 예정이에요.</p>
+  </section>
+
+  <!-- ===== 💬 오늘의 문구 화면 (설정 → 오늘의 문구) ===== -->
+  <section id="quote-view" class="screen" hidden>
+    <div class="screen-bar">
+      <button class="icon-button" type="button" data-back aria-label="뒤로">←</button>
+      <h1>오늘의 문구</h1>
+    </div>
+    <!-- settings-screen.js가 quotes.js의 TYPES 목록으로 채워요 -->
+    <div id="quote-list" class="settings-group"></div>
+    <p class="settings-note">홈 화면 맨 위에 고른 종류의 문구가 날마다 하나씩 바뀌며 보여요.</p>
+    <!-- 고른 종류의 오늘 문구 미리보기 -->
+    <div id="quote-preview" class="quote-preview">
+      <p id="quote-preview-label" class="verse-label"></p>
+      <blockquote id="quote-preview-text"></blockquote>
+      <p id="quote-preview-ref"></p>
+    </div>
   </section>
 
   <!-- ===== ✏️ 할 일 고치기 창 (날짜 팝업에서 할 일 이름을 누르면 떠요) ===== -->

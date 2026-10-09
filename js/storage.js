@@ -32,6 +32,7 @@ const Store = {
         font: 'default',         // 글씨체 (fonts.js의 FONTS 참고)
         language: 'ko',          // 언어 (settings-screen.js의 LANGUAGES 참고)
         appearance: 'system',    // 화면 모드: 'light' / 'dark' / 'system'(기기 설정) (appearance.js)
+        quoteType: 'bible',      // 홈 오늘의 문구 종류: 'bible' / 'healing' / 'famous' (quotes.js)
         notify: {
           enabled: false,        // 알림 켜기
           events: true,          // 일정 시간이 되면 알림
