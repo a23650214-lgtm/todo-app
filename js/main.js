@@ -48,6 +48,7 @@ function render() {
     selectedKey: state.selectedKey,
     onSelect: openDay,
   });
+  CalendarDrag.attach();   // 새로 그린 달력 칸마다 꾹 눌러 끌기 붙이기
 
   // 🌱 Habit: 내 습관 (🔥 연속 기록 + 이번 달 달성 현황을 습관마다 한 카드로)
   HabitListView.render({

@@ -13,6 +13,7 @@
   <meta name="theme-color" content="#4a6cf7">
   <!-- 아이폰용: 홈 화면 아이콘과 이름 -->
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">   <!-- 브라우저 탭 아이콘 (없으면 콘솔에 favicon 404 에러가 떠요) -->
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="PLAN B">
@@ -40,6 +41,7 @@
   <script src="js/storage.js" defer></script>
   <script src="js/tasks.js" defer></script>
   <script src="js/calendar.js" defer></script>
+  <script src="js/vendor/Sortable.min.js" defer></script>
   <script src="js/calendar-drag.js" defer></script>
   <script src="js/habit-view.js" defer></script>
   <script src="js/streaks.js" defer></script>
@@ -450,6 +452,9 @@
       </ol>
     </details>
   </section>
+
+    <!-- 지금 쓰는 앱 버전 (새 버전을 올리면 sw.js의 CACHE_NAME 숫자와 같이 바꿔 주세요) -->
+    <p class="settings-note app-version">PLAN B · 버전 v33</p>
   </section>
 
   <!-- ===== 👤 프로필 화면 (설정 → 프로필) =====
